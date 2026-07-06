@@ -37,9 +37,3 @@ pagehelper:
   support-methods-arguments: true
   params: count=countSql
 
-ai:
-  model:
-    base-url: https://api.openai.com/v1
-    api-key: sk-your-api-key
-    model-name: gpt-3.5-turbo
-    timeout: 60000

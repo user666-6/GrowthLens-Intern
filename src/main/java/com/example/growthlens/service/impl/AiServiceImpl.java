@@ -1,12 +1,12 @@
 package com.example.growthlens.service.impl;
 
 import com.example.growthlens.common.BusinessException;
-import com.example.growthlens.config.AiModelConfig;
 import com.example.growthlens.entity.AiCallLog;
 import com.example.growthlens.entity.AiPromptTemplate;
 import com.example.growthlens.mapper.AiCallLogMapper;
 import com.example.growthlens.mapper.AiPromptTemplateMapper;
 import com.example.growthlens.service.AiService;
+import com.example.growthlens.service.AiSystemConfigService;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
@@ -21,14 +21,15 @@ import java.util.Map;
 
 /**
  * AI服务实现类
- * 封装RestTemplate调用大模型，统一处理请求响应
+ * 封装RestTemplate调用硅基流动(SiliconFlow)大模型API，统一处理请求响应
+ * 硅基流动API完全兼容OpenAI接口格式
  */
 @Slf4j
 @Service
 public class AiServiceImpl implements AiService {
 
     @Autowired
-    private AiModelConfig aiModelConfig;
+    private AiSystemConfigService systemConfigService;
 
     @Autowired
     private RestTemplate restTemplate;
@@ -163,14 +164,28 @@ public class AiServiceImpl implements AiService {
      * 调用大模型API
      */
     private String callAiApi(String prompt) {
-        String url = aiModelConfig.getBaseUrl() + "/chat/completions";
+        String baseUrl = systemConfigService.getConfigValue("AI_BASE_URL");
+        String apiKey = systemConfigService.getConfigValue("AI_API_KEY");
+        String modelName = systemConfigService.getConfigValue("AI_MODEL_NAME");
+
+        if (baseUrl == null || baseUrl.isEmpty()) {
+            throw new BusinessException("AI基础地址未配置");
+        }
+        if (apiKey == null || apiKey.isEmpty()) {
+            throw new BusinessException("AI API密钥未配置");
+        }
+        if (modelName == null || modelName.isEmpty()) {
+            throw new BusinessException("AI模型名称未配置");
+        }
+
+        String url = baseUrl + "/chat/completions";
 
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
-        headers.set("Authorization", "Bearer " + aiModelConfig.getApiKey());
+        headers.set("Authorization", "Bearer " + apiKey);
 
         Map<String, Object> body = new HashMap<>();
-        body.put("model", aiModelConfig.getModelName());
+        body.put("model", modelName);
 
         List<Map<String, String>> messages = List.of(
             Map.of("role", "user", "content", prompt)
@@ -182,7 +197,6 @@ public class AiServiceImpl implements AiService {
 
         ResponseEntity<String> response = restTemplate.postForEntity(url, request, String.class);
 
-        // 解析响应
         try {
             JsonNode root = objectMapper.readTree(response.getBody());
             JsonNode choices = root.get("choices");

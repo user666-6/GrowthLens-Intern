@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.example.growthlens.mapper.AiSystemConfigMapper">
+
+    <resultMap id="BaseResultMap" type="com.example.growthlens.entity.AiSystemConfig">
+        <id column="id" property="id" />
+        <result column="config_key" property="configKey" />
+        <result column="config_value" property="configValue" />
+        <result column="config_name" property="configName" />
+        <result column="config_desc" property="configDesc" />
+        <result column="config_type" property="configType" />
+        <result column="status" property="status" />
+        <result column="create_time" property="createTime" />
+        <result column="update_time" property="updateTime" />
+    </resultMap>
+
+    <insert id="insert" parameterType="com.example.growthlens.entity.AiSystemConfig">
+        INSERT INTO ai_system_config (config_key, config_value, config_name, config_desc, config_type, status)
+        VALUES (#{configKey}, #{configValue}, #{configName}, #{configDesc}, #{configType}, #{status})
+    </insert>
+
+    <update id="update" parameterType="com.example.growthlens.entity.AiSystemConfig">
+        UPDATE ai_system_config
+        SET config_key = #{configKey},
+            config_value = #{configValue},
+            config_name = #{configName},
+            config_desc = #{configDesc},
+            config_type = #{configType},
+            status = #{status},
+            update_time = NOW()
+        WHERE id = #{id}
+    </update>
+
+    <delete id="deleteById" parameterType="java.lang.Long">
+        DELETE FROM ai_system_config WHERE id = #{id}
+    </delete>
+
+</mapper>
