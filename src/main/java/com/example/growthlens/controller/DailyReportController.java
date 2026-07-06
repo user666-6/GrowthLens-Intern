@@ -15,7 +15,7 @@ import java.util.List;
  * 处理日报周报相关的页面跳转和数据操作
  */
 @Controller
-@RequestMapping("/daily")
+@RequestMapping("/dailyreport")
 public class DailyReportController {
 
     /**
@@ -38,7 +38,7 @@ public class DailyReportController {
         PageInfo<DailyReport> pageInfo = new PageInfo<>(list);
         model.addAttribute("pageInfo", pageInfo);
         
-        return "daily/list";
+        return "dailyreport/list";
     }
 
     /**
@@ -47,7 +47,7 @@ public class DailyReportController {
      */
     @GetMapping("/add")
     public String add() {
-        return "daily/add";
+        return "dailyreport/add";
     }
 
     /**
@@ -89,7 +89,7 @@ public class DailyReportController {
      */
     @GetMapping("/edit/{id}")
     public String edit(@PathVariable Long id, Model model) {
-        return "daily/edit";
+        return "dailyreport/edit";
     }
 
     /**

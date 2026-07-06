@@ -13,7 +13,7 @@
     </div>
     <ul class="sidebar-menu">
         <li><a href="<%= ctxPath %>/index" <c:if test="${currentMenu == 'home'}">class="active"</c:if>><i>home</i> 首页</a></li>
-        <li><a href="<%= ctxPath %>/daily/list" <c:if test="${currentMenu == 'daily'}">class="active"</c:if>><i>file-text</i> 日报周报管理</a></li>
+        <li><a href="<%= ctxPath %>/dailyreport/list" <c:if test="${currentMenu == 'daily'}">class="active"</c:if>><i>file-text</i> 日报周报管理</a></li>
         <li><a href="<%= ctxPath %>/growth/list" <c:if test="${currentMenu == 'growth'}">class="active"</c:if>><i>trending-up</i> 成长轨迹追踪</a></li>
         <li><a href="<%= ctxPath %>/goal/list" <c:if test="${currentMenu == 'goal'}">class="active"</c:if>><i>target</i> 目标任务管理</a></li>
         <li><a href="<%= ctxPath %>/review/list" <c:if test="${currentMenu == 'review'}">class="active"</c:if>><i>clipboard</i> 智能复盘分析</a></li>
