@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.example.growthlens.mapper.AiCallLogMapper">
+
+    <resultMap id="BaseResultMap" type="com.example.growthlens.entity.AiCallLog">
+        <id column="id" property="id"/>
+        <result column="user_id" property="userId"/>
+        <result column="username" property="username"/>
+        <result column="template_id" property="templateId"/>
+        <result column="template_name" property="templateName"/>
+        <result column="scene_type" property="sceneType"/>
+        <result column="request_content" property="requestContent"/>
+        <result column="response_content" property="responseContent"/>
+        <result column="call_status" property="callStatus"/>
+        <result column="error_message" property="errorMessage"/>
+        <result column="duration" property="duration"/>
+        <result column="create_time" property="createTime"/>
+    </resultMap>
+
+    <insert id="insert" parameterType="com.example.growthlens.entity.AiCallLog" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO ai_call_log (
+            user_id, username, template_id, template_name, scene_type, request_content, 
+            response_content, call_status, error_message, duration, create_time
+        ) VALUES (
+            #{userId}, #{username}, #{templateId}, #{templateName}, #{sceneType}, #{requestContent},
+            #{responseContent}, #{callStatus}, #{errorMessage}, #{duration}, NOW()
+        )
+    </insert>
+
+    <update id="update" parameterType="com.example.growthlens.entity.AiCallLog">
+        UPDATE ai_call_log SET
+            response_content = #{responseContent},
+            call_status = #{callStatus},
+            error_message = #{errorMessage},
+            duration = #{duration}
+        WHERE id = #{id}
+    </update>
+
+</mapper>
