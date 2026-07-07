@@ -28,8 +28,9 @@ public class WebConfig implements WebMvcConfigurer {
     }
 
     /**
-     * 注册登录拦截器
-     * 放行登录相关路径和静态资源
+     * 注册拦截器
+     * 登录拦截器：拦截所有请求，放行登录相关路径和静态资源
+     * 管理员拦截器：仅拦截用户管理相关路径
      */
     @Override
     public void addInterceptors(InterceptorRegistry registry) {
@@ -46,6 +47,9 @@ public class WebConfig implements WebMvcConfigurer {
                         "/js/**",
                         "/images/**"
                 );
+
+        registry.addInterceptor(new AdminInterceptor())
+                .addPathPatterns("/user/manage/**");
     }
 
     /**

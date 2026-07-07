@@ -71,7 +71,9 @@
         <li><a href="<%= ctxPath %>/review/list" <c:if test="${currentMenu == 'review'}">class="active"</c:if>>智能复盘分析</a></li>
         <li><a href="<%= ctxPath %>/interview/list" <c:if test="${currentMenu == 'interview'}">class="active"</c:if>>面经题库管理</a></li>
         <li><a href="<%= ctxPath %>/chat/index" <c:if test="${currentMenu == 'chat'}">class="active"</c:if>>职场智能助手</a></li>
-        <li><a href="<%= ctxPath %>/user/manage/list" <c:if test="${currentMenu == 'usermanage'}">class="active"</c:if>>用户管理</a></li>
+        <c:if test="${sessionScope.loginUser.role == 1}">
+            <li><a href="<%= ctxPath %>/user/manage/list" <c:if test="${currentMenu == 'usermanage'}">class="active"</c:if>>用户管理</a></li>
+        </c:if>
     </ul>
     <div class="sidebar-user-card">
         <a href="<%= ctxPath %>/user/profile/info">

@@ -11,15 +11,16 @@
         <result column="nickname" property="nickname"/>
         <result column="avatar" property="avatar"/>
         <result column="status" property="status"/>
+        <result column="role" property="role"/>
         <result column="create_time" property="createTime"/>
         <result column="update_time" property="updateTime"/>
     </resultMap>
 
     <insert id="insert" parameterType="com.example.growthlens.entity.SysUser" useGeneratedKeys="true" keyProperty="id">
         INSERT INTO sys_user (
-            username, password, email, phone, nickname, avatar, status, create_time, update_time
+            username, password, email, phone, nickname, avatar, status, role, create_time, update_time
         ) VALUES (
-            #{username}, #{password}, #{email}, #{phone}, #{nickname}, #{avatar}, #{status}, NOW(), NOW()
+            #{username}, #{password}, #{email}, #{phone}, #{nickname}, #{avatar}, #{status}, #{role}, NOW(), NOW()
         )
     </insert>
 
@@ -33,6 +34,7 @@
             <if test="nickname != null">nickname = #{nickname},</if>
             <if test="avatar != null">avatar = #{avatar},</if>
             <if test="status != null">status = #{status},</if>
+            <if test="role != null">role = #{role},</if>
             update_time = NOW()
         </set>
         WHERE id = #{id}
