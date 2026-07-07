@@ -11,7 +11,7 @@
  Target Server Version : 90200 (9.2.0)
  File Encoding         : 65001
 
- Date: 06/07/2026 18:25:05
+ Date: 06/07/2026 21:25:30
 */
 
 SET NAMES utf8mb4;
@@ -39,13 +39,11 @@ CREATE TABLE `ai_call_log`  (
   INDEX `idx_template_id`(`template_id` ASC) USING BTREE,
   INDEX `idx_call_status`(`call_status` ASC) USING BTREE,
   INDEX `idx_create_time`(`create_time` ASC) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 3 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci COMMENT = 'AI调用日志表' ROW_FORMAT = Dynamic;
+) ENGINE = InnoDB AUTO_INCREMENT = 5 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci COMMENT = 'AI调用日志表' ROW_FORMAT = Dynamic;
 
 -- ----------------------------
 -- Records of ai_call_log
 -- ----------------------------
-INSERT INTO `ai_call_log` VALUES (1, 1, 'huang', 1, '文本润色模板', 'polish', '请对以下文本进行润色优化，使其更加通顺、专业、优美：\n\n', NULL, 'fail', 'I/O error on POST request for \"https://api.openai.com/v1/chat/completions\": Connection timed out: connect', 21472, '2026-07-06 16:02:08');
-INSERT INTO `ai_call_log` VALUES (2, 1, 'huang', 1, '文本润色模板', 'polish', '请对以下文本进行润色优化，使其更加通顺、专业、优美：\n\n111', NULL, 'fail', 'I/O error on POST request for \"https://api.openai.com/v1/chat/completions\": Connection timed out: connect', 21045, '2026-07-06 16:02:12');
 
 -- ----------------------------
 -- Table structure for ai_prompt_template
@@ -76,6 +74,33 @@ INSERT INTO `ai_prompt_template` VALUES (2, '复盘分析模板', 'REVIEW_TEMPLA
 INSERT INTO `ai_prompt_template` VALUES (3, '智能问答模板', 'ANSWER_TEMPLATE', '请详细回答以下问题：\n\n{{question}}', '用于智能问答场景，生成问题答案', 'answer', 1, '2026-07-06 14:50:56', '2026-07-06 14:50:56');
 INSERT INTO `ai_prompt_template` VALUES (4, '文本总结模板', 'SUMMARY_TEMPLATE', '请对以下文本进行总结，提炼核心要点：\n\n{{content}}', '用于文本总结场景，提取关键信息', 'summary', 1, '2026-07-06 14:50:56', '2026-07-06 14:50:56');
 INSERT INTO `ai_prompt_template` VALUES (5, '文本翻译模板', 'TRANSLATE_TEMPLATE', '请将以下文本翻译成{{targetLang}}：\n\n{{content}}', '用于文本翻译场景，支持多种语言', 'translate', 1, '2026-07-06 14:50:56', '2026-07-06 14:50:56');
+
+-- ----------------------------
+-- Table structure for ai_system_config
+-- ----------------------------
+DROP TABLE IF EXISTS `ai_system_config`;
+CREATE TABLE `ai_system_config`  (
+  `id` bigint NOT NULL AUTO_INCREMENT COMMENT '配置ID，主键自增',
+  `config_key` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL COMMENT '配置键（如AI_API_KEY、AI_BASE_URL、AI_MODEL_NAME）',
+  `config_value` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NULL COMMENT '配置值',
+  `config_name` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NULL DEFAULT NULL COMMENT '配置名称（用于前端显示）',
+  `config_desc` varchar(500) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NULL DEFAULT NULL COMMENT '配置描述',
+  `config_type` varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NULL DEFAULT 'string' COMMENT '配置类型：string-字符串，password-密码，number-数字，boolean-布尔',
+  `status` tinyint NULL DEFAULT 1 COMMENT '状态：0-禁用，1-启用',
+  `create_time` datetime NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+  `update_time` datetime NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+  PRIMARY KEY (`id`) USING BTREE,
+  UNIQUE INDEX `config_key`(`config_key` ASC) USING BTREE,
+  INDEX `idx_status`(`status` ASC) USING BTREE
+) ENGINE = InnoDB AUTO_INCREMENT = 5 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci COMMENT = 'AI系统配置表' ROW_FORMAT = DYNAMIC;
+
+-- ----------------------------
+-- Records of ai_system_config
+-- ----------------------------
+INSERT INTO `ai_system_config` VALUES (1, 'AI_BASE_URL', 'https://api.siliconflow.cn/v1', 'API基础地址', '硅基流动API的基础URL地址', 'string', 1, '2026-07-06 21:01:44', '2026-07-06 21:19:59');
+INSERT INTO `ai_system_config` VALUES (2, 'AI_API_KEY', 'sk-gbdgtignzviesydekwqmpsrehzagxxnrppwvzaflkulnavcw', 'API密钥', '硅基流动平台的API密钥，用于调用大模型API', 'password', 1, '2026-07-06 21:01:44', '2026-07-06 21:13:39');
+INSERT INTO `ai_system_config` VALUES (3, 'AI_MODEL_NAME', 'Qwen/Qwen3.5-4B', '模型名称', '使用的AI模型名称，如Qwen/Qwen2.5-7B-Instruct', 'string', 1, '2026-07-06 21:01:44', '2026-07-06 21:14:45');
+INSERT INTO `ai_system_config` VALUES (4, 'AI_TIMEOUT', '60000', '请求超时时间', 'AI请求的超时时间（毫秒）', 'number', 1, '2026-07-06 21:01:44', '2026-07-06 21:01:44');
 
 -- ----------------------------
 -- Table structure for chat_record

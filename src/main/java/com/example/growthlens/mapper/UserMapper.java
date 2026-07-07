@@ -5,6 +5,8 @@ import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 import org.apache.ibatis.annotations.Select;
 
+import java.util.List;
+
 /**
  * 用户数据访问层
  * 只负责数据库CRUD操作，不包含业务逻辑
@@ -44,4 +46,14 @@ public interface UserMapper {
      * 根据ID删除用户
      */
     int deleteById(@Param("id") Long id);
+
+    /**
+     * 查询所有用户
+     */
+    List<SysUser> findAll();
+
+    /**
+     * 条件分页查询用户
+     */
+    List<SysUser> findByCondition(@Param("username") String username, @Param("nickname") String nickname, @Param("status") Integer status);
 }

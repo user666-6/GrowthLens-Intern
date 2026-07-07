@@ -8,6 +8,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+
 /**
  * 用户业务逻辑实现类
  * 实现用户相关的业务操作
@@ -87,9 +89,53 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public void deleteById(Long id) {
+        if (id == 1) {
+            throw new BusinessException("超级管理员账号禁止删除");
+        }
         if (userMapper.findById(id) == null) {
             throw new BusinessException("用户不存在");
         }
         userMapper.deleteById(id);
+    }
+
+    @Override
+    public List<SysUser> findAll() {
+        List<SysUser> users = userMapper.findAll();
+        users.forEach(user -> user.setPassword(null));
+        return users;
+    }
+
+    @Override
+    public List<SysUser> findByCondition(String username, String nickname, Integer status) {
+        List<SysUser> users = userMapper.findByCondition(username, nickname, status);
+        users.forEach(user -> user.setPassword(null));
+        return users;
+    }
+
+    @Override
+    public void changePassword(Long userId, String oldPassword, String newPassword) {
+        SysUser user = userMapper.findById(userId);
+        if (user == null) {
+            throw new BusinessException("用户不存在");
+        }
+        if (!passwordEncoder.matches(oldPassword, user.getPassword())) {
+            throw new BusinessException("原密码不正确");
+        }
+        user.setPassword(passwordEncoder.encode(newPassword));
+        userMapper.update(user);
+    }
+
+    @Override
+    public void updateStatus(Long userId, Integer status) {
+        if (userId == 1) {
+            throw new BusinessException("超级管理员账号状态禁止修改");
+        }
+        if (userMapper.findById(userId) == null) {
+            throw new BusinessException("用户不存在");
+        }
+        SysUser user = new SysUser();
+        user.setId(userId);
+        user.setStatus(status);
+        userMapper.update(user);
     }
 }

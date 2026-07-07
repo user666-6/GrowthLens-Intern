@@ -2,6 +2,8 @@ package com.example.growthlens.service;
 
 import com.example.growthlens.entity.SysUser;
 
+import java.util.List;
+
 /**
  * 用户业务逻辑接口
  * 定义用户相关的业务操作方法
@@ -42,4 +44,24 @@ public interface UserService {
      * 删除用户
      */
     void deleteById(Long id);
+
+    /**
+     * 查询所有用户
+     */
+    List<SysUser> findAll();
+
+    /**
+     * 条件分页查询用户
+     */
+    List<SysUser> findByCondition(String username, String nickname, Integer status);
+
+    /**
+     * 修改密码
+     */
+    void changePassword(Long userId, String oldPassword, String newPassword);
+
+    /**
+     * 更新用户状态
+     */
+    void updateStatus(Long userId, Integer status);
 }

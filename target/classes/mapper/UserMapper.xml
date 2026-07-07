@@ -24,20 +24,42 @@
     </insert>
 
     <update id="update" parameterType="com.example.growthlens.entity.SysUser">
-        UPDATE sys_user SET
-            username = #{username},
-            password = #{password},
-            email = #{email},
-            phone = #{phone},
-            nickname = #{nickname},
-            avatar = #{avatar},
-            status = #{status},
+        UPDATE sys_user
+        <set>
+            <if test="username != null">username = #{username},</if>
+            <if test="password != null">password = #{password},</if>
+            <if test="email != null">email = #{email},</if>
+            <if test="phone != null">phone = #{phone},</if>
+            <if test="nickname != null">nickname = #{nickname},</if>
+            <if test="avatar != null">avatar = #{avatar},</if>
+            <if test="status != null">status = #{status},</if>
             update_time = NOW()
+        </set>
         WHERE id = #{id}
     </update>
 
     <delete id="deleteById" parameterType="java.lang.Long">
         DELETE FROM sys_user WHERE id = #{id}
     </delete>
+
+    <select id="findAll" resultMap="BaseResultMap">
+        SELECT * FROM sys_user ORDER BY create_time DESC
+    </select>
+
+    <select id="findByCondition" resultMap="BaseResultMap">
+        SELECT * FROM sys_user
+        <where>
+            <if test="username != null and username != ''">
+                AND username LIKE CONCAT('%', #{username}, '%')
+            </if>
+            <if test="nickname != null and nickname != ''">
+                AND nickname LIKE CONCAT('%', #{nickname}, '%')
+            </if>
+            <if test="status != null">
+                AND status = #{status}
+            </if>
+        </where>
+        ORDER BY create_time DESC
+    </select>
 
 </mapper>
