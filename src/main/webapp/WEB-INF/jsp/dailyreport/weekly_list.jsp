@@ -8,7 +8,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>GrowthLens Intern - 日报周报管理</title>
+    <title>GrowthLens Intern - 周报列表</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <style>
         body {
@@ -128,10 +128,13 @@
                 <div class="card">
                     <div class="card-header">
                         <div class="tab-nav">
-                            <button class="btn btn-primary">日报管理</button>
-                            <button class="btn btn-outline-secondary" onclick="goWeeklyList()">周报管理</button>
+                            <button class="btn btn-outline-secondary" onclick="goDailyList()">日报管理</button>
+                            <button class="btn btn-primary">周报管理</button>
                         </div>
-                        <button class="btn btn-primary btn-sm float-end" onclick="goAdd()">新增日报</button>
+                        <div class="float-end">
+                            <button class="btn btn-primary btn-sm" onclick="goAdd()">手动新增</button>
+                            <button class="btn btn-outline-primary btn-sm" onclick="goGenerate()">生成周报</button>
+                        </div>
                     </div>
                     <div class="card-body">
                         <form class="search-form" onsubmit="search(event)">
@@ -146,10 +149,8 @@
                             <thead>
                                 <tr>
                                     <th>ID</th>
-                                    <th>日期</th>
-                                    <th>今日完成</th>
-                                    <th>遇到问题</th>
-                                    <th>明日计划</th>
+                                    <th>年份/周次</th>
+                                    <th>日期范围</th>
                                     <th>状态</th>
                                     <th>创建时间</th>
                                     <th>操作</th>
@@ -159,10 +160,8 @@
                                 <c:forEach items="${pageInfo.list}" var="item">
                                     <tr>
                                         <td>${item.id}</td>
-                                        <td>${item.reportDate}</td>
-                                        <td style="max-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">${item.todayFinish}</td>
-                                        <td style="max-width: 150px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">${item.encounterProblem}</td>
-                                        <td style="max-width: 150px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">${item.tomorrowPlan}</td>
+                                        <td>${item.weekYear}年 第${item.weekNum}周</td>
+                                        <td>${item.startDate} ~ ${item.endDate}</td>
                                         <td>
                                             <c:if test="${item.status == 1}">
                                                 <span class="text-success">已提交</span>
@@ -184,7 +183,7 @@
                                 </c:forEach>
                                 <c:if test="${empty pageInfo.list}">
                                     <tr>
-                                        <td colspan="8" class="text-center text-muted">暂无数据</td>
+                                        <td colspan="6" class="text-center text-muted">暂无数据</td>
                                     </tr>
                                 </c:if>
                             </tbody>
@@ -202,21 +201,44 @@
     <script>
         var ctxPath = "<%= request.getContextPath() %>";
 
-        function goWeeklyList() {
-            window.location.href = ctxPath + '/dailyreport/weekly/list';
+        function goDailyList() {
+            window.location.href = ctxPath + '/dailyreport/list';
         }
 
         function goAdd() {
-            window.location.href = ctxPath + '/dailyreport/add';
+            window.location.href = ctxPath + '/dailyreport/weekly/add';
+        }
+
+        function goGenerate() {
+            var year = prompt("请输入年份（如2026）：", new Date().getFullYear());
+            if (!year) return;
+            var week = prompt("请输入周次：", "");
+            if (!week) return;
+            fetch(ctxPath + '/dailyreport/weekly/generate', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                body: 'weekYear=' + year + '&weekNum=' + week
+            }).then(function(response) {
+                return response.json();
+            }).then(function(result) {
+                if (result.code === 200) {
+                    alert('生成成功');
+                    window.location.href = ctxPath + '/dailyreport/weekly/edit/' + result.data.id;
+                } else {
+                    alert(result.msg);
+                }
+            }).catch(function(error) {
+                alert('生成失败');
+            });
         }
 
         function goEdit(id) {
-            window.location.href = ctxPath + '/dailyreport/edit/' + id;
+            window.location.href = ctxPath + '/dailyreport/weekly/edit/' + id;
         }
 
         function submitReport(id) {
-            if (confirm('确定要提交这份日报吗？')) {
-                fetch(ctxPath + '/dailyreport/submit/' + id, {
+            if (confirm('确定要提交这份周报吗？')) {
+                fetch(ctxPath + '/dailyreport/weekly/submit/' + id, {
                     method: 'POST'
                 }).then(function(response) {
                     return response.json();
@@ -234,12 +256,12 @@
         }
 
         function exportReport(id) {
-            window.location.href = ctxPath + '/dailyreport/export/' + id;
+            window.location.href = ctxPath + '/dailyreport/weekly/export/' + id;
         }
 
         function deleteReport(id) {
-            if (confirm('确定要删除这份日报吗？')) {
-                fetch(ctxPath + '/dailyreport/delete/' + id, {
+            if (confirm('确定要删除这份周报吗？')) {
+                fetch(ctxPath + '/dailyreport/weekly/delete/' + id, {
                     method: 'DELETE'
                 }).then(function(response) {
                     return response.json();
@@ -261,7 +283,7 @@
             var keyword = document.getElementById('keyword').value;
             var startDate = document.getElementById('startDate').value;
             var endDate = document.getElementById('endDate').value;
-            var url = ctxPath + '/dailyreport/list?';
+            var url = ctxPath + '/dailyreport/weekly/list?';
             if (keyword) url += 'keyword=' + encodeURIComponent(keyword) + '&';
             if (startDate) url += 'startDate=' + startDate + '&';
             if (endDate) url += 'endDate=' + endDate + '&';
@@ -269,7 +291,7 @@
         }
 
         function resetSearch() {
-            window.location.href = ctxPath + '/dailyreport/list';
+            window.location.href = ctxPath + '/dailyreport/weekly/list';
         }
     </script>
 </body>
