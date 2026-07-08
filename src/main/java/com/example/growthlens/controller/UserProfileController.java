@@ -1,9 +1,9 @@
 package com.example.growthlens.controller;
 
+import com.example.growthlens.common.LoginUserHolder;
 import com.example.growthlens.common.Result;
 import com.example.growthlens.entity.SysUser;
 import com.example.growthlens.service.UserService;
-import jakarta.servlet.http.HttpSession;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -20,14 +20,12 @@ public class UserProfileController {
     @Autowired
     private UserService userService;
 
-    private static final String SESSION_USER_KEY = "loginUser";
-
     /**
      * 跳转到个人信息详情页
      */
     @GetMapping("/info")
-    public String info(HttpSession session, Model model) {
-        SysUser loginUser = (SysUser) session.getAttribute(SESSION_USER_KEY);
+    public String info(Model model) {
+        SysUser loginUser = LoginUserHolder.getCurrentUser();
         SysUser user = userService.findById(loginUser.getId());
         model.addAttribute("user", user);
         return "user/profile/info";
@@ -37,8 +35,8 @@ public class UserProfileController {
      * 跳转到编辑个人信息页面
      */
     @GetMapping("/edit")
-    public String edit(HttpSession session, Model model) {
-        SysUser loginUser = (SysUser) session.getAttribute(SESSION_USER_KEY);
+    public String edit(Model model) {
+        SysUser loginUser = LoginUserHolder.getCurrentUser();
         SysUser user = userService.findById(loginUser.getId());
         model.addAttribute("user", user);
         return "user/profile/edit";
@@ -53,10 +51,9 @@ public class UserProfileController {
             @RequestParam(required = false) String nickname,
             @RequestParam(required = false) String email,
             @RequestParam(required = false) String phone,
-            @RequestParam(required = false) String avatar,
-            HttpSession session) {
+            @RequestParam(required = false) String avatar) {
 
-        SysUser loginUser = (SysUser) session.getAttribute(SESSION_USER_KEY);
+        SysUser loginUser = LoginUserHolder.getCurrentUser();
         
         SysUser user = new SysUser();
         user.setId(loginUser.getId());
@@ -67,7 +64,6 @@ public class UserProfileController {
         
         userService.update(user);
         SysUser updatedUser = userService.findById(loginUser.getId());
-        session.setAttribute(SESSION_USER_KEY, updatedUser);
         
         return Result.success("修改成功", updatedUser);
     }
@@ -88,8 +84,7 @@ public class UserProfileController {
     public Result<?> changePassword(
             @RequestParam String oldPassword,
             @RequestParam String newPassword,
-            @RequestParam String confirmPassword,
-            HttpSession session) {
+            @RequestParam String confirmPassword) {
 
         if (!newPassword.equals(confirmPassword)) {
             return Result.error("两次输入的新密码不一致");
@@ -98,10 +93,8 @@ public class UserProfileController {
             return Result.error("密码长度不能少于6位");
         }
 
-        SysUser loginUser = (SysUser) session.getAttribute(SESSION_USER_KEY);
+        SysUser loginUser = LoginUserHolder.getCurrentUser();
         userService.changePassword(loginUser.getId(), oldPassword, newPassword);
-        
-        session.removeAttribute(SESSION_USER_KEY);
         
         return Result.success("密码修改成功，请重新登录");
     }

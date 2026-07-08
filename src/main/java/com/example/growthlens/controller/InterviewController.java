@@ -1,20 +1,18 @@
 package com.example.growthlens.controller;
 
+import com.example.growthlens.common.LoginUserHolder;
 import com.example.growthlens.common.Result;
 import com.example.growthlens.entity.InterviewCategory;
 import com.example.growthlens.entity.InterviewQuestion;
 import com.example.growthlens.entity.SysUser;
 import com.example.growthlens.service.InterviewCategoryService;
 import com.example.growthlens.service.InterviewQuestionService;
-import jakarta.servlet.http.HttpSession;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 @Controller
 @RequestMapping("/interview")
@@ -26,24 +24,18 @@ public class InterviewController {
     @Autowired
     private InterviewCategoryService categoryService;
 
-    private static final String SESSION_USER_KEY = "loginUser";
-
-    private SysUser getCurrentUser(HttpSession session) {
-        return (SysUser) session.getAttribute(SESSION_USER_KEY);
-    }
-
     @GetMapping("/list")
     public String list(
             @RequestParam(defaultValue = "") String keyword,
             @RequestParam(required = false) Long categoryId,
             @RequestParam(required = false) Integer isWrong,
             @RequestParam(required = false) Integer isCollected,
-            Model model, HttpSession session) {
-        SysUser user = getCurrentUser(session);
+            Model model) {
+        SysUser user = LoginUserHolder.getCurrentUser();
         List<InterviewQuestion> questions = questionService.search(
                 user.getId(), categoryId, keyword, isWrong, isCollected);
         List<InterviewCategory> categories = categoryService.findByUserId(user.getId());
-        
+
         model.addAttribute("questions", questions);
         model.addAttribute("categories", categories);
         model.addAttribute("keyword", keyword);
@@ -54,8 +46,8 @@ public class InterviewController {
     }
 
     @GetMapping("/add")
-    public String add(Model model, HttpSession session) {
-        SysUser user = getCurrentUser(session);
+    public String add(Model model) {
+        SysUser user = LoginUserHolder.getCurrentUser();
         List<InterviewCategory> categories = categoryService.findByUserId(user.getId());
         model.addAttribute("categories", categories);
         return "interview/add";
@@ -70,9 +62,8 @@ public class InterviewController {
             @RequestParam(defaultValue = "2") Integer difficultyLevel,
             @RequestParam(defaultValue = "1") Integer masterLevel,
             @RequestParam(required = false) String sourceCompany,
-            @RequestParam(required = false) String sourcePost,
-            HttpSession session) {
-        SysUser user = getCurrentUser(session);
+            @RequestParam(required = false) String sourcePost) {
+        SysUser user = LoginUserHolder.getCurrentUser();
         InterviewQuestion question = new InterviewQuestion();
         question.setUserId(user.getId());
         question.setCategoryId(categoryId);
@@ -89,8 +80,8 @@ public class InterviewController {
     }
 
     @GetMapping("/edit/{id}")
-    public String edit(@PathVariable Long id, Model model, HttpSession session) {
-        SysUser user = getCurrentUser(session);
+    public String edit(@PathVariable Long id, Model model) {
+        SysUser user = LoginUserHolder.getCurrentUser();
         InterviewQuestion question = questionService.findById(id);
         if (question == null || !question.getUserId().equals(user.getId())) {
             return "redirect:/interview/list";
@@ -113,9 +104,8 @@ public class InterviewController {
             @RequestParam(required = false) String sourceCompany,
             @RequestParam(required = false) String sourcePost,
             @RequestParam(required = false) String myAnswer,
-            @RequestParam(required = false) String reviewSummary,
-            HttpSession session) {
-        SysUser user = getCurrentUser(session);
+            @RequestParam(required = false) String reviewSummary) {
+        SysUser user = LoginUserHolder.getCurrentUser();
         InterviewQuestion question = questionService.findById(id);
         if (question == null || !question.getUserId().equals(user.getId())) {
             return Result.error("题目不存在");
@@ -135,8 +125,8 @@ public class InterviewController {
 
     @DeleteMapping("/delete/{id}")
     @ResponseBody
-    public Result<?> delete(@PathVariable Long id, HttpSession session) {
-        SysUser user = getCurrentUser(session);
+    public Result<?> delete(@PathVariable Long id) {
+        SysUser user = LoginUserHolder.getCurrentUser();
         InterviewQuestion question = questionService.findById(id);
         if (question != null && !question.getUserId().equals(user.getId())) {
             return Result.error("无权删除");
@@ -147,8 +137,8 @@ public class InterviewController {
 
     @PostMapping("/collect/{id}")
     @ResponseBody
-    public Result<?> collect(@PathVariable Long id, HttpSession session) {
-        SysUser user = getCurrentUser(session);
+    public Result<?> collect(@PathVariable Long id) {
+        SysUser user = LoginUserHolder.getCurrentUser();
         InterviewQuestion question = questionService.findById(id);
         if (question == null || !question.getUserId().equals(user.getId())) {
             return Result.error("题目不存在");
@@ -160,8 +150,8 @@ public class InterviewController {
 
     @PostMapping("/markWrong/{id}")
     @ResponseBody
-    public Result<?> markWrong(@PathVariable Long id, HttpSession session) {
-        SysUser user = getCurrentUser(session);
+    public Result<?> markWrong(@PathVariable Long id) {
+        SysUser user = LoginUserHolder.getCurrentUser();
         InterviewQuestion question = questionService.findById(id);
         if (question == null || !question.getUserId().equals(user.getId())) {
             return Result.error("题目不存在");
@@ -173,8 +163,8 @@ public class InterviewController {
 
     @PostMapping("/updateMasterLevel/{id}")
     @ResponseBody
-    public Result<?> updateMasterLevel(@PathVariable Long id, @RequestParam Integer level, HttpSession session) {
-        SysUser user = getCurrentUser(session);
+    public Result<?> updateMasterLevel(@PathVariable Long id, @RequestParam Integer level) {
+        SysUser user = LoginUserHolder.getCurrentUser();
         InterviewQuestion question = questionService.findById(id);
         if (question == null || !question.getUserId().equals(user.getId())) {
             return Result.error("题目不存在");
@@ -186,8 +176,8 @@ public class InterviewController {
 
     @PostMapping("/generateAnswer/{id}")
     @ResponseBody
-    public Result<String> generateAnswer(@PathVariable Long id, HttpSession session) {
-        SysUser user = getCurrentUser(session);
+    public Result<String> generateAnswer(@PathVariable Long id) {
+        SysUser user = LoginUserHolder.getCurrentUser();
         InterviewQuestion question = questionService.findById(id);
         if (question == null || !question.getUserId().equals(user.getId())) {
             return Result.error("题目不存在");
@@ -205,8 +195,8 @@ public class InterviewController {
     @GetMapping("/category")
     public String categoryList(
             @RequestParam(defaultValue = "") String categoryType,
-            Model model, HttpSession session) {
-        SysUser user = getCurrentUser(session);
+            Model model) {
+        SysUser user = LoginUserHolder.getCurrentUser();
         List<InterviewCategory> categories = categoryService.findByUserId(user.getId());
         model.addAttribute("categories", categories);
         model.addAttribute("categoryType", categoryType);
@@ -220,9 +210,8 @@ public class InterviewController {
             @RequestParam String categoryType,
             @RequestParam(required = false, defaultValue = "0") Long parentId,
             @RequestParam(required = false, defaultValue = "0") Integer sort,
-            @RequestParam(required = false) String remark,
-            HttpSession session) {
-        SysUser user = getCurrentUser(session);
+            @RequestParam(required = false) String remark) {
+        SysUser user = LoginUserHolder.getCurrentUser();
         InterviewCategory category = new InterviewCategory();
         category.setUserId(user.getId());
         category.setCategoryName(categoryName);
@@ -240,9 +229,8 @@ public class InterviewController {
             @RequestParam Long id,
             @RequestParam String categoryName,
             @RequestParam(required = false, defaultValue = "0") Integer sort,
-            @RequestParam(required = false) String remark,
-            HttpSession session) {
-        SysUser user = getCurrentUser(session);
+            @RequestParam(required = false) String remark) {
+        SysUser user = LoginUserHolder.getCurrentUser();
         InterviewCategory category = categoryService.findById(id);
         if (category == null || !category.getUserId().equals(user.getId())) {
             return Result.error("分类不存在");
@@ -256,8 +244,8 @@ public class InterviewController {
 
     @DeleteMapping("/category/delete/{id}")
     @ResponseBody
-    public Result<?> deleteCategory(@PathVariable Long id, HttpSession session) {
-        SysUser user = getCurrentUser(session);
+    public Result<?> deleteCategory(@PathVariable Long id) {
+        SysUser user = LoginUserHolder.getCurrentUser();
         InterviewCategory category = categoryService.findById(id);
         if (category != null && !category.getUserId().equals(user.getId())) {
             return Result.error("无权删除");
@@ -271,10 +259,10 @@ public class InterviewController {
     public String practice(
             @RequestParam(defaultValue = "random") String mode,
             @RequestParam(required = false) Long categoryId,
-            Model model, HttpSession session) {
-        SysUser user = getCurrentUser(session);
+            Model model) {
+        SysUser user = LoginUserHolder.getCurrentUser();
         List<InterviewQuestion> questions;
-        
+
         switch (mode) {
             case "wrong":
                 questions = questionService.findWrongQuestions(user.getId());
@@ -288,9 +276,9 @@ public class InterviewController {
             default:
                 questions = questionService.findRandomQuestions(user.getId(), 10);
         }
-        
+
         List<InterviewCategory> categories = categoryService.findByUserId(user.getId());
-        
+
         model.addAttribute("questions", questions);
         model.addAttribute("categories", categories);
         model.addAttribute("mode", mode);

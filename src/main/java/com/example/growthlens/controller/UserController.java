@@ -1,11 +1,17 @@
 package com.example.growthlens.controller;
 
+import com.example.growthlens.common.JwtUtil;
+import com.example.growthlens.common.LoginUserHolder;
 import com.example.growthlens.common.Result;
 import com.example.growthlens.entity.SysUser;
 import com.example.growthlens.service.UserService;
-import jakarta.servlet.http.HttpSession;
+import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
+
+import java.io.IOException;
 
 /**
  * 用户控制器
@@ -18,19 +24,30 @@ public class UserController {
     @Autowired
     private UserService userService;
 
+    @Autowired
+    private JwtUtil jwtUtil;
+
     /**
-     * 登录用户在Session中的key
+     * JWT令牌在Cookie中的名称
      */
-    private static final String SESSION_USER_KEY = "loginUser";
+    private static final String COOKIE_TOKEN_NAME = "token";
 
     /**
      * 用户登录接口
+     * 登录成功后生成JWT令牌并写入HttpOnly Cookie
      */
     @PostMapping("/login")
-    public Result<SysUser> login(@RequestParam String username, @RequestParam String password, HttpSession session) {
+    public Result<SysUser> login(@RequestParam String username, @RequestParam String password,
+                                  HttpServletResponse response) {
         SysUser user = userService.login(username, password);
-        // 将用户信息存入Session
-        session.setAttribute(SESSION_USER_KEY, user);
+        String token = jwtUtil.generateToken(user);
+        
+        Cookie cookie = new Cookie(COOKIE_TOKEN_NAME, token);
+        cookie.setHttpOnly(true);
+        cookie.setPath("/");
+        cookie.setMaxAge((int) (jwtUtil.getExpireTime() / 1000));
+        response.addCookie(cookie);
+        
         return Result.success("登录成功", user);
     }
 
@@ -45,20 +62,26 @@ public class UserController {
 
     /**
      * 用户退出登录
+     * 清除Cookie中的JWT令牌，并重定向到登录页
      */
     @PostMapping("/logout")
-    public Result<?> logout(HttpSession session) {
-        // 清除Session中的用户信息
-        session.removeAttribute(SESSION_USER_KEY);
-        return Result.success("退出成功");
+    public void logout(HttpServletRequest request, HttpServletResponse response) throws IOException {
+        Cookie cookie = new Cookie(COOKIE_TOKEN_NAME, "");
+        cookie.setHttpOnly(true);
+        cookie.setPath("/");
+        cookie.setMaxAge(0);
+        response.addCookie(cookie);
+        
+        response.sendRedirect(request.getContextPath() + "/login");
     }
 
     /**
      * 获取当前登录用户信息
+     * 从LoginUserHolder中获取当前登录用户
      */
     @GetMapping("/info")
-    public Result<SysUser> getUserInfo(HttpSession session) {
-        SysUser user = (SysUser) session.getAttribute(SESSION_USER_KEY);
+    public Result<SysUser> getUserInfo() {
+        SysUser user = LoginUserHolder.getCurrentUser();
         return Result.success(user);
     }
 
@@ -66,12 +89,10 @@ public class UserController {
      * 更新用户信息
      */
     @PutMapping("/update")
-    public Result<SysUser> update(@RequestBody SysUser user, HttpSession session) {
+    public Result<SysUser> update(@RequestBody SysUser user) {
         userService.update(user);
-        // 更新Session中的用户信息
         SysUser updatedUser = userService.findById(user.getId());
         updatedUser.setPassword(null);
-        session.setAttribute(SESSION_USER_KEY, updatedUser);
         return Result.success("更新成功", updatedUser);
     }
 

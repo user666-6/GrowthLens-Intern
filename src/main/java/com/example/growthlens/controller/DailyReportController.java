@@ -1,5 +1,6 @@
 package com.example.growthlens.controller;
 
+import com.example.growthlens.common.LoginUserHolder;
 import com.example.growthlens.common.Result;
 import com.example.growthlens.entity.DailyReport;
 import com.example.growthlens.entity.SysUser;
@@ -9,7 +10,6 @@ import com.example.growthlens.service.DailyReportService;
 import com.example.growthlens.service.WeeklyReportService;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
-import jakarta.servlet.http.HttpSession;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -19,12 +19,9 @@ import org.springframework.web.bind.annotation.*;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.IsoFields;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 @Controller
 @RequestMapping("/dailyreport")
@@ -39,12 +36,6 @@ public class DailyReportController {
     @Autowired
     private AiService aiService;
 
-    private static final String SESSION_USER_KEY = "loginUser";
-
-    private SysUser getCurrentUser(HttpSession session) {
-        return (SysUser) session.getAttribute(SESSION_USER_KEY);
-    }
-
     @GetMapping("/list")
     public String dailyList(
             @RequestParam(defaultValue = "1") Integer pageNum,
@@ -52,12 +43,9 @@ public class DailyReportController {
             @RequestParam(required = false) String startDate,
             @RequestParam(required = false) String endDate,
             @RequestParam(required = false) String keyword,
-            Model model, HttpSession session) {
+            Model model) {
 
-        SysUser user = getCurrentUser(session);
-        if (user == null) {
-            return "redirect:/login";
-        }
+        SysUser user = LoginUserHolder.getCurrentUser();
 
         PageHelper.startPage(pageNum, pageSize);
 
@@ -98,10 +86,9 @@ public class DailyReportController {
             @RequestParam(required = false) String todayFinish,
             @RequestParam(required = false) String encounterProblem,
             @RequestParam(required = false) String tomorrowPlan,
-            @RequestParam(defaultValue = "0") Integer status,
-            HttpSession session) {
+            @RequestParam(defaultValue = "0") Integer status) {
 
-        SysUser user = getCurrentUser(session);
+        SysUser user = LoginUserHolder.getCurrentUser();
         DailyReport report = new DailyReport();
         report.setUserId(user.getId());
         report.setReportDate(LocalDate.parse(reportDate));
@@ -121,10 +108,9 @@ public class DailyReportController {
             @RequestParam String reportDate,
             @RequestParam(required = false) String todayFinish,
             @RequestParam(required = false) String encounterProblem,
-            @RequestParam(required = false) String tomorrowPlan,
-            HttpSession session) {
+            @RequestParam(required = false) String tomorrowPlan) {
 
-        SysUser user = getCurrentUser(session);
+        SysUser user = LoginUserHolder.getCurrentUser();
         DailyReport report = new DailyReport();
         report.setUserId(user.getId());
         report.setReportDate(LocalDate.parse(reportDate));
@@ -192,11 +178,8 @@ public class DailyReportController {
 
     @PostMapping("/polish")
     @ResponseBody
-    public Result<String> dailyPolish(
-            @RequestParam String content,
-            HttpSession session) {
-
-        SysUser user = getCurrentUser(session);
+    public Result<String> dailyPolish(@RequestParam String content) {
+        SysUser user = LoginUserHolder.getCurrentUser();
         String polished = aiService.polish(user.getId(), user.getUsername(), content);
         return Result.success("润色成功", polished);
     }
@@ -208,12 +191,9 @@ public class DailyReportController {
             @RequestParam(required = false) String startDate,
             @RequestParam(required = false) String endDate,
             @RequestParam(required = false) String keyword,
-            Model model, HttpSession session) {
+            Model model) {
 
-        SysUser user = getCurrentUser(session);
-        if (user == null) {
-            return "redirect:/login";
-        }
+        SysUser user = LoginUserHolder.getCurrentUser();
 
         PageHelper.startPage(pageNum, pageSize);
 
@@ -259,10 +239,9 @@ public class DailyReportController {
             @RequestParam(required = false) String weekSummary,
             @RequestParam(required = false) String problemReview,
             @RequestParam(required = false) String nextWeekPlan,
-            @RequestParam(defaultValue = "0") Integer status,
-            HttpSession session) {
+            @RequestParam(defaultValue = "0") Integer status) {
 
-        SysUser user = getCurrentUser(session);
+        SysUser user = LoginUserHolder.getCurrentUser();
         WeeklyReport report = new WeeklyReport();
         report.setUserId(user.getId());
         report.setWeekYear(weekYear);
@@ -286,10 +265,9 @@ public class DailyReportController {
     @ResponseBody
     public Result<WeeklyReport> weeklyGenerate(
             @RequestParam Integer weekYear,
-            @RequestParam Integer weekNum,
-            HttpSession session) {
+            @RequestParam Integer weekNum) {
 
-        SysUser user = getCurrentUser(session);
+        SysUser user = LoginUserHolder.getCurrentUser();
         WeeklyReport report = weeklyReportService.generateFromDaily(user.getId(), weekYear, weekNum);
         return Result.success("生成成功", report);
     }
@@ -356,11 +334,8 @@ public class DailyReportController {
 
     @PostMapping("/weekly/polish")
     @ResponseBody
-    public Result<String> weeklyPolish(
-            @RequestParam String content,
-            HttpSession session) {
-
-        SysUser user = getCurrentUser(session);
+    public Result<String> weeklyPolish(@RequestParam String content) {
+        SysUser user = LoginUserHolder.getCurrentUser();
         String polished = aiService.polish(user.getId(), user.getUsername(), content);
         return Result.success("润色成功", polished);
     }

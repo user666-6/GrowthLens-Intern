@@ -1,7 +1,9 @@
 package com.example.growthlens.common;
 
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 /**
@@ -37,5 +39,15 @@ public class GlobalExceptionHandler {
     public Result<?> handleIllegalArgumentException(IllegalArgumentException e) {
         log.warn("参数异常：{}", e.getMessage());
         return Result.error(400, e.getMessage());
+    }
+
+    /**
+     * 处理401未授权异常
+     */
+    @ExceptionHandler(UnauthorizedException.class)
+    @ResponseStatus(HttpStatus.UNAUTHORIZED)
+    public Result<?> handleUnauthorizedException(UnauthorizedException e) {
+        log.warn("未授权访问：{}", e.getMessage());
+        return Result.error(401, e.getMessage());
     }
 }

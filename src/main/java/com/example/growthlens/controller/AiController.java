@@ -1,11 +1,11 @@
 package com.example.growthlens.controller;
 
+import com.example.growthlens.common.LoginUserHolder;
 import com.example.growthlens.common.Result;
 import com.example.growthlens.entity.AiCallLog;
 import com.example.growthlens.entity.AiPromptTemplate;
 import com.example.growthlens.entity.SysUser;
 import com.example.growthlens.service.AiService;
-import jakarta.servlet.http.HttpSession;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -24,23 +24,11 @@ public class AiController {
     private AiService aiService;
 
     /**
-     * 登录用户在Session中的key
-     */
-    private static final String SESSION_USER_KEY = "loginUser";
-
-    /**
-     * 获取当前登录用户信息
-     */
-    private SysUser getCurrentUser(HttpSession session) {
-        return (SysUser) session.getAttribute(SESSION_USER_KEY);
-    }
-
-    /**
      * 润色文本
      */
     @PostMapping("/polish")
-    public Result<String> polish(@RequestParam String content, HttpSession session) {
-        SysUser user = getCurrentUser(session);
+    public Result<String> polish(@RequestParam String content) {
+        SysUser user = LoginUserHolder.getCurrentUser();
         String result = aiService.polish(user.getId(), user.getUsername(), content);
         return Result.success("润色成功", result);
     }
@@ -49,8 +37,8 @@ public class AiController {
      * 复盘分析
      */
     @PostMapping("/review")
-    public Result<String> review(@RequestParam String content, HttpSession session) {
-        SysUser user = getCurrentUser(session);
+    public Result<String> review(@RequestParam String content) {
+        SysUser user = LoginUserHolder.getCurrentUser();
         String result = aiService.review(user.getId(), user.getUsername(), content);
         return Result.success("复盘分析成功", result);
     }
@@ -59,8 +47,8 @@ public class AiController {
      * 生成答案
      */
     @PostMapping("/answer")
-    public Result<String> generateAnswer(@RequestParam String question, HttpSession session) {
-        SysUser user = getCurrentUser(session);
+    public Result<String> generateAnswer(@RequestParam String question) {
+        SysUser user = LoginUserHolder.getCurrentUser();
         String result = aiService.generateAnswer(user.getId(), user.getUsername(), question);
         return Result.success("生成答案成功", result);
     }
@@ -69,8 +57,8 @@ public class AiController {
      * 总结文本
      */
     @PostMapping("/summary")
-    public Result<String> summarize(@RequestParam String content, HttpSession session) {
-        SysUser user = getCurrentUser(session);
+    public Result<String> summarize(@RequestParam String content) {
+        SysUser user = LoginUserHolder.getCurrentUser();
         String result = aiService.summarize(user.getId(), user.getUsername(), content);
         return Result.success("总结成功", result);
     }
@@ -79,8 +67,8 @@ public class AiController {
      * 翻译文本
      */
     @PostMapping("/translate")
-    public Result<String> translate(@RequestParam String content, @RequestParam String targetLang, HttpSession session) {
-        SysUser user = getCurrentUser(session);
+    public Result<String> translate(@RequestParam String content, @RequestParam String targetLang) {
+        SysUser user = LoginUserHolder.getCurrentUser();
         String result = aiService.translate(user.getId(), user.getUsername(), content, targetLang);
         return Result.success("翻译成功", result);
     }
@@ -89,8 +77,8 @@ public class AiController {
      * 根据模板调用AI
      */
     @PostMapping("/call")
-    public Result<String> callByTemplate(@RequestParam String templateCode, @RequestBody Map<String, String> params, HttpSession session) {
-        SysUser user = getCurrentUser(session);
+    public Result<String> callByTemplate(@RequestParam String templateCode, @RequestBody Map<String, String> params) {
+        SysUser user = LoginUserHolder.getCurrentUser();
         String result = aiService.callByTemplate(user.getId(), user.getUsername(), templateCode, params);
         return Result.success("调用成功", result);
     }
@@ -153,8 +141,8 @@ public class AiController {
      * 获取当前用户调用日志
      */
     @GetMapping("/logs")
-    public Result<List<AiCallLog>> getUserLogs(HttpSession session) {
-        SysUser user = getCurrentUser(session);
+    public Result<List<AiCallLog>> getUserLogs() {
+        SysUser user = LoginUserHolder.getCurrentUser();
         List<AiCallLog> logs = aiService.getUserCallLogs(user.getId());
         return Result.success(logs);
     }

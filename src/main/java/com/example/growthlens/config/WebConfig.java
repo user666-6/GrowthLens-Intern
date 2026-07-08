@@ -1,5 +1,6 @@
 package com.example.growthlens.config;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
 import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry;
@@ -13,6 +14,12 @@ import org.springframework.web.servlet.view.InternalResourceViewResolver;
  */
 @Configuration
 public class WebConfig implements WebMvcConfigurer {
+
+    @Autowired
+    private LoginInterceptor loginInterceptor;
+
+    @Autowired
+    private AdminInterceptor adminInterceptor;
 
     /**
      * 配置视图解析器
@@ -34,7 +41,7 @@ public class WebConfig implements WebMvcConfigurer {
      */
     @Override
     public void addInterceptors(InterceptorRegistry registry) {
-        registry.addInterceptor(new LoginInterceptor())
+        registry.addInterceptor(loginInterceptor)
                 .addPathPatterns("/**")
                 .excludePathPatterns(
                         "/",
@@ -48,7 +55,7 @@ public class WebConfig implements WebMvcConfigurer {
                         "/images/**"
                 );
 
-        registry.addInterceptor(new AdminInterceptor())
+        registry.addInterceptor(adminInterceptor)
                 .addPathPatterns("/user/manage/**");
     }
 

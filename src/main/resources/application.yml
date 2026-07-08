@@ -36,3 +36,7 @@ pagehelper:
   reasonable: true
   support-methods-arguments: true
   params: count=countSql
+
+jwt:
+  secret: GrowthLens2026JWTSecretKeyForInternProjectWith32PlusChars
+  expire-time: 604800000

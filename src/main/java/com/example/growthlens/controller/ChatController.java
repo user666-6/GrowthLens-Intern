@@ -1,12 +1,12 @@
 package com.example.growthlens.controller;
 
+import com.example.growthlens.common.LoginUserHolder;
 import com.example.growthlens.common.Result;
 import com.example.growthlens.entity.ChatRecord;
 import com.example.growthlens.entity.SysUser;
 import com.example.growthlens.service.ChatService;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
-import jakarta.servlet.http.HttpSession;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -23,12 +23,6 @@ public class ChatController {
 
     public ChatController(ChatService chatService) {
         this.chatService = chatService;
-    }
-
-    private static final String SESSION_USER_KEY = "loginUser";
-
-    private SysUser getCurrentUser(HttpSession session) {
-        return (SysUser) session.getAttribute(SESSION_USER_KEY);
     }
 
     @GetMapping("/index")
@@ -52,9 +46,8 @@ public class ChatController {
             @RequestParam(defaultValue = "10") Integer pageSize,
             @RequestParam(required = false) String sceneType,
             @RequestParam(required = false) Integer isCollected,
-            HttpSession session,
             Model model) {
-        SysUser user = getCurrentUser(session);
+        SysUser user = LoginUserHolder.getCurrentUser();
         PageHelper.startPage(pageNum, pageSize);
         List<ChatRecord> list;
         if (isCollected != null && isCollected == 1) {
@@ -75,9 +68,8 @@ public class ChatController {
     @ResponseBody
     public Result<String> freeChat(
             @RequestParam String question,
-            @RequestParam(required = false) String sessionId,
-            HttpSession session) {
-        SysUser user = getCurrentUser(session);
+            @RequestParam(required = false) String sessionId) {
+        SysUser user = LoginUserHolder.getCurrentUser();
         String answer = chatService.freeChat(user.getId(), user.getUsername(), question, sessionId);
         return Result.success("生成成功", answer);
     }
@@ -86,9 +78,8 @@ public class ChatController {
     @ResponseBody
     public Result<String> generateScript(
             @RequestParam String sceneSubType,
-            @RequestParam String context,
-            HttpSession session) {
-        SysUser user = getCurrentUser(session);
+            @RequestParam String context) {
+        SysUser user = LoginUserHolder.getCurrentUser();
         String answer = chatService.generateScript(user.getId(), user.getUsername(), sceneSubType, context);
         return Result.success("生成成功", answer);
     }
@@ -98,9 +89,8 @@ public class ChatController {
     public Result<String> generatePlan(
             @RequestParam String skillName,
             @RequestParam String targetLevel,
-            @RequestParam String duration,
-            HttpSession session) {
-        SysUser user = getCurrentUser(session);
+            @RequestParam String duration) {
+        SysUser user = LoginUserHolder.getCurrentUser();
         String answer = chatService.generateStudyPlan(user.getId(), user.getUsername(), skillName, targetLevel, duration);
         return Result.success("生成成功", answer);
     }
@@ -109,22 +99,21 @@ public class ChatController {
     @ResponseBody
     public Result<Object> toggleCollection(
             @PathVariable Long id,
-            @RequestParam Integer isCollected,
-            HttpSession session) {
+            @RequestParam Integer isCollected) {
         chatService.toggleCollection(id, isCollected);
         return Result.success();
     }
 
     @DeleteMapping("/delete/{id}")
     @ResponseBody
-    public Result<Object> deleteRecord(@PathVariable Long id, HttpSession session) {
+    public Result<Object> deleteRecord(@PathVariable Long id) {
         chatService.deleteRecord(id);
         return Result.success();
     }
 
     @GetMapping("/record/{id}")
     @ResponseBody
-    public Result<ChatRecord> getRecord(@PathVariable Long id, HttpSession session) {
+    public Result<ChatRecord> getRecord(@PathVariable Long id) {
         ChatRecord record = chatService.getRecordById(id);
         return Result.success(record);
     }
