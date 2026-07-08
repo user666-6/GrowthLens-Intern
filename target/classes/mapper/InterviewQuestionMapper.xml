@@ -1,0 +1,107 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.example.growthlens.mapper.InterviewQuestionMapper">
+
+    <resultMap id="BaseResultMap" type="com.example.growthlens.entity.InterviewQuestion">
+        <id column="id" property="id"/>
+        <result column="user_id" property="userId"/>
+        <result column="category_id" property="categoryId"/>
+        <result column="question_title" property="questionTitle"/>
+        <result column="question_content" property="questionContent"/>
+        <result column="my_answer" property="myAnswer"/>
+        <result column="reference_answer" property="referenceAnswer"/>
+        <result column="review_summary" property="reviewSummary"/>
+        <result column="difficulty_level" property="difficultyLevel"/>
+        <result column="master_level" property="masterLevel"/>
+        <result column="source_company" property="sourceCompany"/>
+        <result column="source_post" property="sourcePost"/>
+        <result column="is_collected" property="isCollected"/>
+        <result column="is_wrong" property="isWrong"/>
+        <result column="create_time" property="createTime"/>
+        <result column="update_time" property="updateTime"/>
+    </resultMap>
+
+    <insert id="insert" parameterType="com.example.growthlens.entity.InterviewQuestion" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO interview_question (
+            user_id, category_id, question_title, question_content, my_answer, 
+            reference_answer, review_summary, difficulty_level, master_level, 
+            source_company, source_post, is_collected, is_wrong, create_time, update_time
+        ) VALUES (
+            #{userId}, #{categoryId}, #{questionTitle}, #{questionContent}, #{myAnswer},
+            #{referenceAnswer}, #{reviewSummary}, #{difficultyLevel}, #{masterLevel},
+            #{sourceCompany}, #{sourcePost}, #{isCollected}, #{isWrong}, NOW(), NOW()
+        )
+    </insert>
+
+    <update id="update" parameterType="com.example.growthlens.entity.InterviewQuestion">
+        UPDATE interview_question SET
+            category_id = #{categoryId},
+            question_title = #{questionTitle},
+            question_content = #{questionContent},
+            my_answer = #{myAnswer},
+            reference_answer = #{referenceAnswer},
+            review_summary = #{reviewSummary},
+            difficulty_level = #{difficultyLevel},
+            master_level = #{masterLevel},
+            source_company = #{sourceCompany},
+            source_post = #{sourcePost},
+            is_collected = #{isCollected},
+            is_wrong = #{isWrong},
+            update_time = NOW()
+        WHERE id = #{id}
+    </update>
+
+    <delete id="deleteById" parameterType="java.lang.Long">
+        DELETE FROM interview_question WHERE id = #{id}
+    </delete>
+
+    <delete id="deleteByCategoryId" parameterType="java.lang.Long">
+        DELETE FROM interview_question WHERE category_id = #{categoryId}
+    </delete>
+
+    <select id="findById" parameterType="java.lang.Long" resultMap="BaseResultMap">
+        SELECT * FROM interview_question WHERE id = #{id}
+    </select>
+
+    <select id="findByUserId" parameterType="java.lang.Long" resultMap="BaseResultMap">
+        SELECT * FROM interview_question WHERE user_id = #{userId} ORDER BY create_time DESC
+    </select>
+
+    <select id="findByCategoryId" resultMap="BaseResultMap">
+        SELECT * FROM interview_question WHERE user_id = #{userId} AND category_id = #{categoryId} ORDER BY create_time DESC
+    </select>
+
+    <select id="findByMasterLevel" resultMap="BaseResultMap">
+        SELECT * FROM interview_question WHERE user_id = #{userId} AND master_level = #{masterLevel} ORDER BY create_time DESC
+    </select>
+
+    <select id="findWrongQuestions" parameterType="java.lang.Long" resultMap="BaseResultMap">
+        SELECT * FROM interview_question WHERE user_id = #{userId} AND is_wrong = 1 ORDER BY create_time DESC
+    </select>
+
+    <select id="findCollectedQuestions" parameterType="java.lang.Long" resultMap="BaseResultMap">
+        SELECT * FROM interview_question WHERE user_id = #{userId} AND is_collected = 1 ORDER BY create_time DESC
+    </select>
+
+    <select id="findRandomQuestions" resultMap="BaseResultMap">
+        SELECT * FROM interview_question WHERE user_id = #{userId} ORDER BY RAND() LIMIT #{limit}
+    </select>
+
+    <select id="search" resultMap="BaseResultMap">
+        SELECT * FROM interview_question WHERE user_id = #{userId}
+        <if test="categoryId != null">AND category_id = #{categoryId}</if>
+        <if test="keyword != null and keyword != ''">AND (question_title LIKE CONCAT('%', #{keyword}, '%') OR question_content LIKE CONCAT('%', #{keyword}, '%'))</if>
+        <if test="isWrong != null">AND is_wrong = #{isWrong}</if>
+        <if test="isCollected != null">AND is_collected = #{isCollected}</if>
+        ORDER BY create_time DESC
+    </select>
+
+    <select id="countByUserId" parameterType="java.lang.Long" resultType="java.lang.Integer">
+        SELECT COUNT(*) FROM interview_question WHERE user_id = #{userId}
+    </select>
+
+    <select id="countByCategoryId" resultType="java.lang.Integer">
+        SELECT COUNT(*) FROM interview_question WHERE user_id = #{userId} AND category_id = #{categoryId}
+    </select>
+
+</mapper>
