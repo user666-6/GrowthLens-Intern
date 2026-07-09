@@ -114,6 +114,17 @@
                             <div class="mt-4">
                                 <button type="button" class="btn btn-primary" onclick="submitForm()">保存修改</button>
                                 <button type="button" class="btn btn-secondary ms-2" onclick="goBack()">取消</button>
+                                <button type="button" class="btn btn-outline-info ms-2" onclick="generateSmartGoals()">AI智能拆解</button>
+                            </div>
+                            
+                            <div id="smartResult" class="mt-4 d-none">
+                                <div class="card">
+                                    <div class="card-header">AI智能拆解结果</div>
+                                    <div class="card-body">
+                                        <pre id="smartContent" class="bg-light p-3 rounded"></pre>
+                                        <button class="btn btn-sm btn-primary mt-2" onclick="applySmartGoals()">应用拆解结果</button>
+                                    </div>
+                                </div>
                             </div>
                         </form>
                     </div>
@@ -125,6 +136,7 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
     <script>
         var ctxPath = "<%= request.getContextPath() %>";
+        var smartResultData = null;
         
         function goBack() {
             window.location.href = ctxPath + '/goal/list';
@@ -153,6 +165,66 @@
                     alert(result.msg);
                 }
             }).catch(err => alert('提交失败'));
+        }
+        
+        function generateSmartGoals() {
+            var goalName = document.getElementById('goalName').value;
+            var goalDesc = document.getElementById('goalDesc').value;
+            var endDate = document.getElementById('endDate').value;
+            
+            if (!goalName) {
+                alert('请先输入目标名称');
+                return;
+            }
+            
+            var duration = 30;
+            if (endDate) {
+                var start = new Date();
+                var end = new Date(endDate);
+                duration = Math.ceil((end - start) / (1000 * 60 * 60 * 24));
+                if (duration < 1) duration = 30;
+            }
+            
+            fetch(ctxPath + '/goal/smart/generate', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                body: 'goalName=' + encodeURIComponent(goalName) + '&goalDesc=' + encodeURIComponent(goalDesc) + '&duration=' + duration
+            }).then(res => res.json()).then(result => {
+                if (result.code === 200) {
+                    smartResultData = result.data;
+                    document.getElementById('smartContent').textContent = result.data;
+                    document.getElementById('smartResult').classList.remove('d-none');
+                } else {
+                    alert(result.msg);
+                }
+            }).catch(err => alert('AI拆解失败'));
+        }
+        
+        function applySmartGoals() {
+            if (!smartResultData) {
+                alert('请先生成AI拆解结果');
+                return;
+            }
+            
+            var goalId = document.getElementById('id').value;
+            
+            var formData = new FormData();
+            formData.append('goalId', goalId);
+            formData.append('goalName', document.getElementById('goalName').value);
+            formData.append('goalDesc', document.getElementById('goalDesc').value);
+            
+            fetch(ctxPath + '/goal/smart/tasks/save', {
+                method: 'POST',
+                body: formData
+            }).then(res => res.json()).then(result => {
+                if (result.code === 200) {
+                    var data = result.data;
+                    alert('已自动生成 ' + data.taskCount + ' 个任务');
+                    window.location.href = ctxPath + '/goal/detail/' + goalId;
+                } else {
+                    alert(result.msg);
+                }
+            }).catch(err => alert('应用拆解失败'));
         }
     </script>
 </body>

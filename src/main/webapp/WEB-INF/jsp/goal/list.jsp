@@ -109,7 +109,7 @@
                                         </td>
                                         <td>${goal.startDate} ~ ${goal.endDate}</td>
                                         <td>
-                                            <button class="btn btn-sm btn-warning" onclick="editGoal(${goal.id})">编辑</button>
+                                            <button class="btn btn-sm btn-info" onclick="viewDetail(${goal.id})">详情</button>
                                             <button class="btn btn-sm btn-danger" onclick="deleteGoal(${goal.id})">删除</button>
                                         </td>
                                     </tr>
@@ -149,8 +149,8 @@
             window.location.href = url;
         }
         
-        function editGoal(id) {
-            window.location.href = ctxPath + '/goal/edit/' + id;
+        function viewDetail(id) {
+            window.location.href = ctxPath + '/goal/detail/' + id;
         }
         
         function deleteGoal(id) {

@@ -13,6 +13,7 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 
 @Controller
 @RequestMapping("/goal")
@@ -217,6 +218,34 @@ public class GoalController {
         SysUser user = LoginUserHolder.getCurrentUser();
         String result = goalService.generateSmartGoals(user.getId(), goalName, goalDesc != null ? goalDesc : "", duration);
         return Result.success("智能拆解成功", result);
+    }
+
+    @PostMapping("/smart/save")
+    @ResponseBody
+    public Result<Map<String, Object>> generateAndSaveSmartGoals(
+            @RequestParam String goalName,
+            @RequestParam(required = false) String goalDesc,
+            @RequestParam(required = false, defaultValue = "study") String goalType,
+            @RequestParam(required = false) Integer priority,
+            @RequestParam(required = false) String startDate,
+            @RequestParam(required = false) String endDate,
+            @RequestParam(required = false) String expectResult) {
+        
+        SysUser user = LoginUserHolder.getCurrentUser();
+        Map<String, Object> result = goalService.generateAndSaveSmartGoals(
+                user.getId(), goalName, goalDesc, goalType, priority, startDate, endDate, expectResult);
+        return Result.success("智能拆解并保存成功", result);
+    }
+
+    @PostMapping("/smart/tasks/save")
+    @ResponseBody
+    public Result<Map<String, Object>> generateAndSaveSmartTasks(
+            @RequestParam Long goalId,
+            @RequestParam(required = false) String goalName,
+            @RequestParam(required = false) String goalDesc) {
+        
+        Map<String, Object> result = goalService.generateAndSaveSmartTasks(goalId, goalName, goalDesc);
+        return Result.success("智能拆解并保存任务成功", result);
     }
 
     @GetMapping("/api/list")

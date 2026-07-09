@@ -7,11 +7,15 @@ import com.example.growthlens.mapper.GoalInfoMapper;
 import com.example.growthlens.mapper.GoalTaskMapper;
 import com.example.growthlens.service.AiService;
 import com.example.growthlens.service.GoalService;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @Service
 public class GoalServiceImpl implements GoalService {
@@ -197,6 +201,146 @@ public class GoalServiceImpl implements GoalService {
             return aiService.generateAnswer(userId, "", prompt);
         } catch (Exception e) {
             throw new BusinessException("AI智能拆解失败：" + e.getMessage());
+        }
+    }
+
+    @Override
+    @Transactional
+    public Map<String, Object> generateAndSaveSmartGoals(Long userId, String goalName, String goalDesc, 
+            String goalType, Integer priority, String startDate, String endDate, String expectResult) {
+        String desc = goalDesc != null ? goalDesc : "";
+        String prompt = String.format("请帮我将以下目标拆解为阶段性目标和具体任务：\n\n目标名称：%s\n目标描述：%s\n预计周期：30天\n\n请按照以下格式输出JSON：\n{\n  \"phases\": [\n    {\n      \"phaseName\": \"阶段名称\",\n      \"startDay\": 开始天数,\n      \"endDay\": 结束天数,\n      \"tasks\": [\n        {\"taskName\": \"任务名称\", \"taskDesc\": \"任务描述\", \"priority\": 优先级(1-3)}\n      ]\n    }\n  ]\n}", goalName, desc);
+
+        try {
+            String aiResponse = aiService.generateAnswer(userId, "", prompt);
+            
+            String jsonContent = extractJson(aiResponse);
+            
+            ObjectMapper objectMapper = new ObjectMapper();
+            JsonNode root = objectMapper.readTree(jsonContent);
+            JsonNode phases = root.get("phases");
+            
+            GoalInfo goalInfo = new GoalInfo();
+            goalInfo.setUserId(userId);
+            goalInfo.setGoalName(goalName);
+            goalInfo.setGoalDesc(goalDesc);
+            goalInfo.setGoalType(goalType != null && !goalType.isEmpty() ? goalType : "study");
+            goalInfo.setPriority(priority != null ? priority : 2);
+            if (startDate != null && !startDate.isEmpty()) {
+                goalInfo.setStartDate(java.time.LocalDate.parse(startDate));
+            }
+            if (endDate != null && !endDate.isEmpty()) {
+                goalInfo.setEndDate(java.time.LocalDate.parse(endDate));
+            }
+            goalInfo.setExpectResult(expectResult);
+            goalInfo.setProgress(0);
+            goalInfo.setStatus(1);
+            
+            goalInfoMapper.insert(goalInfo);
+            Long goalId = goalInfo.getId();
+            
+            int taskCount = 0;
+            if (phases != null && phases.isArray()) {
+                for (JsonNode phase : phases) {
+                    JsonNode tasks = phase.get("tasks");
+                    if (tasks != null && tasks.isArray()) {
+                        for (JsonNode taskNode : tasks) {
+                            GoalTask goalTask = new GoalTask();
+                            goalTask.setUserId(userId);
+                            goalTask.setGoalId(goalId);
+                            goalTask.setTaskName(taskNode.has("taskName") ? taskNode.get("taskName").asText() : "未命名任务");
+                            goalTask.setTaskDesc(taskNode.has("taskDesc") ? taskNode.get("taskDesc").asText() : "");
+                            goalTask.setPriority(taskNode.has("priority") ? taskNode.get("priority").asInt() : 2);
+                            goalTask.setStatus(1);
+                            goalTask.setSort(taskCount);
+                            
+                            goalTaskMapper.insert(goalTask);
+                            taskCount++;
+                        }
+                    }
+                }
+            }
+            
+            updateGoalProgress(goalId);
+            
+            Map<String, Object> result = new HashMap<>();
+            result.put("goalId", goalId);
+            result.put("goalName", goalName);
+            result.put("taskCount", taskCount);
+            result.put("aiResponse", aiResponse);
+            
+            return result;
+        } catch (Exception e) {
+            throw new BusinessException("AI智能拆解并保存失败：" + e.getMessage());
+        }
+    }
+
+    private String extractJson(String response) {
+        if (response == null || response.isEmpty()) {
+            throw new BusinessException("AI返回内容为空");
+        }
+        
+        int startIdx = response.indexOf('{');
+        int endIdx = response.lastIndexOf('}');
+        
+        if (startIdx == -1 || endIdx == -1 || startIdx > endIdx) {
+            throw new BusinessException("AI返回内容不是有效的JSON格式");
+        }
+        
+        return response.substring(startIdx, endIdx + 1);
+    }
+
+    @Override
+    @Transactional
+    public Map<String, Object> generateAndSaveSmartTasks(Long goalId, String goalName, String goalDesc) {
+        String prompt = String.format("请帮我将以下目标拆解为具体任务：\n\n目标名称：%s\n目标描述：%s\n\n请按照以下格式输出JSON：\n{\n  \"phases\": [\n    {\n      \"phaseName\": \"阶段名称\",\n      \"startDay\": 开始天数,\n      \"endDay\": 结束天数,\n      \"tasks\": [\n        {\"taskName\": \"任务名称\", \"taskDesc\": \"任务描述\", \"priority\": 优先级(1-3)}\n      ]\n    }\n  ]\n}", goalName, goalDesc);
+
+        try {
+            GoalInfo goalInfo = goalInfoMapper.findById(goalId);
+            if (goalInfo == null) {
+                throw new BusinessException("目标不存在");
+            }
+            
+            String aiResponse = aiService.generateAnswer(goalInfo.getUserId(), "", prompt);
+            
+            String jsonContent = extractJson(aiResponse);
+            
+            ObjectMapper objectMapper = new ObjectMapper();
+            JsonNode root = objectMapper.readTree(jsonContent);
+            JsonNode phases = root.get("phases");
+            
+            int taskCount = 0;
+            if (phases != null && phases.isArray()) {
+                for (JsonNode phase : phases) {
+                    JsonNode tasks = phase.get("tasks");
+                    if (tasks != null && tasks.isArray()) {
+                        for (JsonNode taskNode : tasks) {
+                            GoalTask goalTask = new GoalTask();
+                            goalTask.setUserId(goalInfo.getUserId());
+                            goalTask.setGoalId(goalId);
+                            goalTask.setTaskName(taskNode.has("taskName") ? taskNode.get("taskName").asText() : "未命名任务");
+                            goalTask.setTaskDesc(taskNode.has("taskDesc") ? taskNode.get("taskDesc").asText() : "");
+                            goalTask.setPriority(taskNode.has("priority") ? taskNode.get("priority").asInt() : 2);
+                            goalTask.setStatus(1);
+                            goalTask.setSort(taskCount);
+                            
+                            goalTaskMapper.insert(goalTask);
+                            taskCount++;
+                        }
+                    }
+                }
+            }
+            
+            updateGoalProgress(goalId);
+            
+            Map<String, Object> result = new HashMap<>();
+            result.put("goalId", goalId);
+            result.put("taskCount", taskCount);
+            result.put("aiResponse", aiResponse);
+            
+            return result;
+        } catch (Exception e) {
+            throw new BusinessException("AI智能拆解并保存任务失败：" + e.getMessage());
         }
     }
 }

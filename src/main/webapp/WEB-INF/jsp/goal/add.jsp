@@ -186,7 +186,32 @@
         }
         
         function applySmartGoals() {
-            alert('拆解结果已生成，请手动创建目标后再添加任务');
+            if (!smartResultData) {
+                alert('请先生成AI拆解结果');
+                return;
+            }
+            
+            var formData = new FormData();
+            formData.append('goalName', document.getElementById('goalName').value);
+            formData.append('goalDesc', document.getElementById('goalDesc').value || '');
+            formData.append('goalType', document.getElementById('goalType').value);
+            formData.append('priority', parseInt(document.getElementById('priority').value));
+            formData.append('startDate', document.getElementById('startDate').value || '');
+            formData.append('endDate', document.getElementById('endDate').value || '');
+            formData.append('expectResult', document.getElementById('expectResult').value || '');
+            
+            fetch(ctxPath + '/goal/smart/save', {
+                method: 'POST',
+                body: formData
+            }).then(res => res.json()).then(result => {
+                if (result.code === 200) {
+                    var data = result.data;
+                    alert('目标创建成功，已自动生成 ' + data.taskCount + ' 个任务');
+                    window.location.href = ctxPath + '/goal/detail/' + data.goalId;
+                } else {
+                    alert(result.msg);
+                }
+            }).catch(err => alert('应用拆解失败: ' + err.message));
         }
     </script>
 </body>

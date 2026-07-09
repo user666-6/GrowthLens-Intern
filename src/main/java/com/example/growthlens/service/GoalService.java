@@ -41,4 +41,9 @@ public interface GoalService {
     List<GoalTask> getTasksByUserIdAndStatus(Long userId, Integer status);
 
     String generateSmartGoals(Long userId, String goalName, String goalDesc, Integer duration);
+
+    Map<String, Object> generateAndSaveSmartGoals(Long userId, String goalName, String goalDesc,
+            String goalType, Integer priority, String startDate, String endDate, String expectResult);
+
+    Map<String, Object> generateAndSaveSmartTasks(Long goalId, String goalName, String goalDesc);
 }
