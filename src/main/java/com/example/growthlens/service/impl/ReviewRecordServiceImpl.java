@@ -318,5 +318,12 @@ public class ReviewRecordServiceImpl implements ReviewRecordService {
         }
 
         reviewRecordMapper.deleteById(id);
+
+        Long maxId = reviewRecordMapper.selectMaxId();
+        if (maxId == null || maxId == 0) {
+            reviewRecordMapper.resetAutoIncrement(1L);
+        } else {
+            reviewRecordMapper.resetAutoIncrement(maxId + 1);
+        }
     }
 }

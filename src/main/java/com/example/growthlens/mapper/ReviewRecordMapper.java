@@ -56,4 +56,18 @@ public interface ReviewRecordMapper {
                                    @Param("reviewType") String reviewType,
                                    @Param("startDate") LocalDate startDate,
                                    @Param("endDate") LocalDate endDate);
+
+    /**
+     * 查询最大ID
+     *
+     * @return 最大ID，无记录返回0
+     */
+    Long selectMaxId();
+
+    /**
+     * 重置自增ID
+     *
+     * @param nextId 下一个ID值
+     */
+    void resetAutoIncrement(@Param("nextId") Long nextId);
 }

@@ -63,4 +63,12 @@
         ORDER BY create_time DESC
     </select>
 
+    <select id="selectMaxId" resultType="java.lang.Long">
+        SELECT IFNULL(MAX(id), 0) FROM review_record
+    </select>
+
+    <update id="resetAutoIncrement">
+        ALTER TABLE review_record AUTO_INCREMENT = #{nextId}
+    </update>
+
 </mapper>
