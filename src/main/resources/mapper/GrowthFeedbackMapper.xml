@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.example.growthlens.mapper.GrowthFeedbackMapper">
+
+    <resultMap id="BaseResultMap" type="com.example.growthlens.entity.GrowthFeedback">
+        <id column="id" property="id"/>
+        <result column="user_id" property="userId"/>
+        <result column="feedback_source" property="feedbackSource"/>
+        <result column="feedback_type" property="feedbackType"/>
+        <result column="feedback_content" property="feedbackContent"/>
+        <result column="correspond_scene" property="correspondScene"/>
+        <result column="record_date" property="recordDate"/>
+        <result column="remark" property="remark"/>
+        <result column="create_time" property="createTime"/>
+        <result column="update_time" property="updateTime"/>
+    </resultMap>
+
+    <insert id="insert" parameterType="com.example.growthlens.entity.GrowthFeedback" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO growth_feedback (
+            user_id, feedback_source, feedback_type, feedback_content, correspond_scene,
+            record_date, remark, create_time, update_time
+        ) VALUES (
+            #{userId}, #{feedbackSource}, #{feedbackType}, #{feedbackContent}, #{correspondScene},
+            #{recordDate}, #{remark}, NOW(), NOW()
+        )
+    </insert>
+
+    <update id="update" parameterType="com.example.growthlens.entity.GrowthFeedback">
+        UPDATE growth_feedback SET
+            feedback_source = #{feedbackSource},
+            feedback_type = #{feedbackType},
+            feedback_content = #{feedbackContent},
+            correspond_scene = #{correspondScene},
+            record_date = #{recordDate},
+            remark = #{remark},
+            update_time = NOW()
+        WHERE id = #{id}
+    </update>
+
+    <delete id="deleteById" parameterType="java.lang.Long">
+        DELETE FROM growth_feedback WHERE id = #{id}
+    </delete>
+
+    <select id="countByFeedbackType" resultType="java.util.Map">
+        SELECT feedback_type AS name, COUNT(*) AS value
+        FROM growth_feedback
+        WHERE user_id = #{userId}
+        GROUP BY feedback_type
+    </select>
+
+    <select id="countByFeedbackSource" resultType="java.util.Map">
+        SELECT feedback_source AS name, COUNT(*) AS value
+        FROM growth_feedback
+        WHERE user_id = #{userId}
+        GROUP BY feedback_source
+    </select>
+
+</mapper>

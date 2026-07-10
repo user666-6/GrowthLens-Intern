@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.example.growthlens.mapper.GrowthProjectMapper">
+
+    <resultMap id="BaseResultMap" type="com.example.growthlens.entity.GrowthProject">
+        <id column="id" property="id"/>
+        <result column="user_id" property="userId"/>
+        <result column="project_name" property="projectName"/>
+        <result column="project_role" property="projectRole"/>
+        <result column="project_desc" property="projectDesc"/>
+        <result column="personal_duty" property="personalDuty"/>
+        <result column="achievement" property="achievement"/>
+        <result column="tech_stack" property="techStack"/>
+        <result column="start_date" property="startDate"/>
+        <result column="end_date" property="endDate"/>
+        <result column="project_link" property="projectLink"/>
+        <result column="remark" property="remark"/>
+        <result column="create_time" property="createTime"/>
+        <result column="update_time" property="updateTime"/>
+    </resultMap>
+
+    <insert id="insert" parameterType="com.example.growthlens.entity.GrowthProject" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO growth_project (
+            user_id, project_name, project_role, project_desc, personal_duty, achievement,
+            tech_stack, start_date, end_date, project_link, remark, create_time, update_time
+        ) VALUES (
+            #{userId}, #{projectName}, #{projectRole}, #{projectDesc}, #{personalDuty}, #{achievement},
+            #{techStack}, #{startDate}, #{endDate}, #{projectLink}, #{remark}, NOW(), NOW()
+        )
+    </insert>
+
+    <update id="update" parameterType="com.example.growthlens.entity.GrowthProject">
+        UPDATE growth_project SET
+            project_name = #{projectName},
+            project_role = #{projectRole},
+            project_desc = #{projectDesc},
+            personal_duty = #{personalDuty},
+            achievement = #{achievement},
+            tech_stack = #{techStack},
+            start_date = #{startDate},
+            end_date = #{endDate},
+            project_link = #{projectLink},
+            remark = #{remark},
+            update_time = NOW()
+        WHERE id = #{id}
+    </update>
+
+    <delete id="deleteById" parameterType="java.lang.Long">
+        DELETE FROM growth_project WHERE id = #{id}
+    </delete>
+
+    <select id="countByMonth" resultType="java.util.Map">
+        SELECT DATE_FORMAT(start_date, '%Y-%m') AS month, COUNT(*) AS count
+        FROM growth_project
+        WHERE user_id = #{userId}
+        GROUP BY DATE_FORMAT(start_date, '%Y-%m')
+        ORDER BY month
+    </select>
+
+</mapper>
