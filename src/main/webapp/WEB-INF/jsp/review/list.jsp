@@ -130,6 +130,9 @@
         .status-pending {
             color: #ffc107;
         }
+        .status-processing {
+            color: #17a2b8;
+        }
         .result-section {
             display: none;
             margin-top: 20px;
@@ -480,6 +483,9 @@
                 if (item.status === 0) { 
                     statusClass = 'status-fail'; 
                     statusText = '失败'; 
+                } else if (item.status === 2) {
+                    statusClass = 'status-processing';
+                    statusText = '生成中';
                 }
                 
                 var row = '<tr>' +
@@ -528,6 +534,9 @@
                     if (data.status === 0) { 
                         statusClass = 'text-danger'; 
                         statusText = '失败'; 
+                    } else if (data.status === 2) {
+                        statusClass = 'text-info';
+                        statusText = '生成中';
                     }
                     
                     document.getElementById('detailType').className = 'type-badge ' + typeClass;
@@ -621,6 +630,9 @@
             });
         }
 
+        document.addEventListener('DOMContentLoaded', function() {
+            init();
+        });
         window.onload = init;
     </script>
 </body>

@@ -65,6 +65,7 @@ public class LoginInterceptor implements HandlerInterceptor {
         user.setPassword(null);
         LoginUserHolder.setCurrentUser(user);
         request.setAttribute(REQUEST_USER_KEY, user);
+        request.getSession().setAttribute(REQUEST_USER_KEY, user);
 
         return true;
     }

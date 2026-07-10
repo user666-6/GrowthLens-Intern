@@ -133,7 +133,7 @@ public class ReviewRecordServiceImpl implements ReviewRecordService {
             record.setStartDate(startDate);
             record.setEndDate(endDate);
             record.setOriginalContent(originalContent);
-            record.setStatus(0);
+            record.setStatus(2);
             reviewRecordMapper.insert(record);
             log.info("[步骤4成功] 记录已保存到数据库，ID: {}", record.getId());
 
@@ -283,7 +283,7 @@ public class ReviewRecordServiceImpl implements ReviewRecordService {
     @Override
     public PageInfo<ReviewRecord> getMyReviewPage(int pageNum, int pageSize, String reviewType, LocalDate startDate, LocalDate endDate) {
         SysUser currentUser = LoginUserHolder.getCurrentUser();
-        Long userId = currentUser.getRole() == 1 ? null : currentUser.getId();
+        Long userId = currentUser.getId();
 
         PageHelper.startPage(pageNum, pageSize);
         List<ReviewRecord> list = reviewRecordMapper.selectPage(userId, reviewType, startDate, endDate);
