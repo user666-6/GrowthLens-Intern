@@ -145,7 +145,7 @@
                 const result = await response.json();
                 
                 if (result.code === 200) {
-                    window.location.href = ctxPath + '/';
+                    window.location.href = ctxPath + '/?t=' + new Date().getTime();
                 } else {
                     alert(result.msg);
                 }

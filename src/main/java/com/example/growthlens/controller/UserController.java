@@ -8,6 +8,7 @@ import com.example.growthlens.service.UserService;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpSession;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -38,7 +39,7 @@ public class UserController {
      */
     @PostMapping("/login")
     public Result<SysUser> login(@RequestParam String username, @RequestParam String password,
-                                  HttpServletResponse response) {
+                                  HttpServletResponse response, HttpSession session) {
         SysUser user = userService.login(username, password);
         String token = jwtUtil.generateToken(user);
         
@@ -47,6 +48,9 @@ public class UserController {
         cookie.setPath("/");
         cookie.setMaxAge((int) (jwtUtil.getExpireTime() / 1000));
         response.addCookie(cookie);
+        
+        user.setPassword(null);
+        session.setAttribute("loginUser", user);
         
         return Result.success("登录成功", user);
     }
@@ -65,12 +69,14 @@ public class UserController {
      * 清除Cookie中的JWT令牌，并重定向到登录页
      */
     @PostMapping("/logout")
-    public void logout(HttpServletRequest request, HttpServletResponse response) throws IOException {
+    public void logout(HttpServletRequest request, HttpServletResponse response, HttpSession session) throws IOException {
         Cookie cookie = new Cookie(COOKIE_TOKEN_NAME, "");
         cookie.setHttpOnly(true);
         cookie.setPath("/");
         cookie.setMaxAge(0);
         response.addCookie(cookie);
+        
+        session.invalidate();
         
         response.sendRedirect(request.getContextPath() + "/login");
     }
