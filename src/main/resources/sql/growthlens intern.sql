@@ -111,6 +111,7 @@ INSERT INTO `ai_prompt_template` VALUES (3, '智能问答模板', 'ANSWER_TEMPLA
 INSERT INTO `ai_prompt_template` VALUES (4, '文本总结模板', 'SUMMARY_TEMPLATE', '请对以下文本进行总结，提炼核心要点：\n\n{{content}}', '用于文本总结场景，提取关键信息', 'summary', 1, '2026-07-06 14:50:56', '2026-07-06 14:50:56');
 INSERT INTO `ai_prompt_template` VALUES (5, '文本翻译模板', 'TRANSLATE_TEMPLATE', '请将以下文本翻译成{{targetLang}}：\n\n{{content}}', '用于文本翻译场景，支持多种语言', 'translate', 1, '2026-07-06 14:50:56', '2026-07-06 14:50:56');
 INSERT INTO `ai_prompt_template` VALUES (6, '文本摘要精简', 'text_summary', '请将以下工作日报内容精简为结构化的要点清单，只保留核心工作内容和问题，去掉冗余表述，总字数控制在原文的30%以内，分点输出：\n\n{{content}}', NULL, 'summary', 1, '2026-07-09 09:17:59', '2026-07-09 09:17:59');
+INSERT INTO `ai_prompt_template` (template_name, template_code, template_content, description, scene_type, status, create_time, update_time) VALUES ('STAR法则成果提炼模板', 'STAR_TEMPLATE', '请根据以下项目信息，按照STAR法则（Situation-情境、Task-任务、Action-行动、Result-结果）的格式，自动生成专业的成果表述。要求：\n\n1. 使用强动词，突出个人贡献和主动性\n2. 尽可能量化成果，使用具体数据\n3. 语言简洁专业，适合简历或绩效汇报\n4. 如果信息不足，合理补充但不编造\n\n项目名称：{{projectName}}\n项目角色：{{projectRole}}\n项目描述：{{projectDesc}}\n个人职责：{{personalDuty}}\n主要成果：{{achievement}}\n技术栈：{{techStack}}\n\n请输出以下格式：\n\n**【情境（Situation）】**\n[描述项目背景、面临的挑战和机会]\n\n**【任务（Task）】**\n[描述你的具体职责和目标]\n\n**【行动（Action）】**\n[描述你采取的具体行动和解决方案]\n\n**【结果（Result）】**\n[描述取得的成果，尽量量化]\n\n**【成果总结】**\n[用一句话概括整体成果，适合简历描述]', '用于项目成果提炼，按照STAR法则生成专业表述', 'star', 1, NOW(), NOW());
 
 -- ----------------------------
 -- Table structure for ai_system_config

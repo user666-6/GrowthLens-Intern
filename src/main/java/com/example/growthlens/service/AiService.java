@@ -69,6 +69,20 @@ public interface AiService {
     String callByTemplate(Long userId, String username, String templateCode, Map<String, String> params);
 
     /**
+     * 使用STAR法则生成成果表述
+     * @param userId 用户ID
+     * @param username 用户名
+     * @param projectName 项目名称
+     * @param projectRole 项目角色
+     * @param projectDesc 项目描述
+     * @param personalDuty 个人职责
+     * @param achievement 主要成果
+     * @param techStack 技术栈
+     * @return STAR格式的成果表述
+     */
+    String generateStar(Long userId, String username, String projectName, String projectRole, String projectDesc, String personalDuty, String achievement, String techStack);
+
+    /**
      * 获取所有启用的模板
      */
     List<AiPromptTemplate> getAllEnabledTemplates();

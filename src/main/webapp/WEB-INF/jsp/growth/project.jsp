@@ -132,6 +132,7 @@
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">取消</button>
+                    <button type="button" class="btn btn-success btn-sm" id="btn-ai-fill">AI生成成果</button>
                     <button type="button" class="btn btn-primary" id="btn-save">保存</button>
                 </div>
             </div>
@@ -183,6 +184,7 @@
                 var text = document.getElementById('star-content').textContent;
                 navigator.clipboard.writeText(text).then(function() { alert('已复制到剪贴板'); });
             });
+            document.getElementById('btn-ai-fill').addEventListener('click', aiFillAchievement);
         });
 
         function loadProjects() {
@@ -319,6 +321,46 @@
                     if (res.code === 200) document.getElementById('star-content').textContent = res.data;
                     else document.getElementById('star-content').textContent = '生成失败：' + res.msg;
                 }).catch(function(e) { document.getElementById('star-content').textContent = '请求失败，请稍后重试'; });
+        }
+
+        function aiFillAchievement() {
+            var projectDesc = document.getElementById('f-projectDesc').value.trim();
+            if (!projectDesc) {
+                alert('请先填写项目描述');
+                return;
+            }
+
+            var btn = document.getElementById('btn-ai-fill');
+            var originalText = btn.textContent;
+            btn.textContent = '生成中...';
+            btn.disabled = true;
+
+            var data = {
+                projectName: document.getElementById('f-projectName').value.trim(),
+                projectRole: document.getElementById('f-projectRole').value.trim(),
+                projectDesc: projectDesc,
+                personalDuty: document.getElementById('f-personalDuty').value.trim(),
+                achievement: document.getElementById('f-achievement').value.trim(),
+                techStack: document.getElementById('f-techStack').value.trim()
+            };
+
+            fetch(ctxPath + '/project/star-generate', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(data)
+            }).then(function(r) { return r.json(); }).then(function(res) {
+                if (res.code === 200) {
+                    document.getElementById('star-content').textContent = res.data;
+                    new bootstrap.Modal(document.getElementById('starModal')).show();
+                } else {
+                    alert('生成失败：' + res.msg);
+                }
+            }).catch(function(e) {
+                alert('请求失败，请稍后重试');
+            }).finally(function() {
+                btn.textContent = originalText;
+                btn.disabled = false;
+            });
         }
 
         function escHtml(s) { var d = document.createElement('div'); d.textContent = s; return d.innerHTML; }

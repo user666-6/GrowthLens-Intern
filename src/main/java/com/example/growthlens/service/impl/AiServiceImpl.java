@@ -50,6 +50,7 @@ public class AiServiceImpl implements AiService {
     private static final String SCENE_ANSWER = "answer";
     private static final String SCENE_SUMMARY = "summary";
     private static final String SCENE_TRANSLATE = "translate";
+    private static final String SCENE_STAR = "star";
 
     @Override
     public String polish(Long userId, String username, String content) {
@@ -104,6 +105,22 @@ public class AiServiceImpl implements AiService {
         Map<String, String> params = new HashMap<>();
         params.put("content", content);
         params.put("targetLang", targetLang);
+        return callByTemplate(userId, username, template.getTemplateCode(), params);
+    }
+
+    @Override
+    public String generateStar(Long userId, String username, String projectName, String projectRole, String projectDesc, String personalDuty, String achievement, String techStack) {
+        AiPromptTemplate template = promptTemplateMapper.findByCode("STAR_TEMPLATE");
+        if (template == null) {
+            throw new BusinessException("STAR法则模板不存在");
+        }
+        Map<String, String> params = new HashMap<>();
+        params.put("projectName", projectName != null ? projectName : "");
+        params.put("projectRole", projectRole != null ? projectRole : "");
+        params.put("projectDesc", projectDesc != null ? projectDesc : "");
+        params.put("personalDuty", personalDuty != null ? personalDuty : "");
+        params.put("achievement", achievement != null ? achievement : "");
+        params.put("techStack", techStack != null ? techStack : "");
         return callByTemplate(userId, username, template.getTemplateCode(), params);
     }
 

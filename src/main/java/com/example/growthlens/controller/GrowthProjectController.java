@@ -9,7 +9,6 @@ import com.example.growthlens.service.GrowthProjectService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -59,16 +58,32 @@ public class GrowthProjectController {
         SysUser user = LoginUserHolder.getCurrentUser();
         GrowthProject project = projectService.findById(id);
 
-        Map<String, String> params = new HashMap<>();
-        params.put("projectName", project.getProjectName());
-        params.put("projectRole", project.getProjectRole() != null ? project.getProjectRole() : "");
-        params.put("projectDesc", project.getProjectDesc() != null ? project.getProjectDesc() : "");
-        params.put("personalDuty", project.getPersonalDuty() != null ? project.getPersonalDuty() : "");
-        params.put("achievement", project.getAchievement() != null ? project.getAchievement() : "");
-        params.put("techStack", project.getTechStack() != null ? project.getTechStack() : "");
-
-        String result = aiService.callByTemplate(user.getId(), user.getUsername(), "STAR_TEMPLATE", params);
+        String result = aiService.generateStar(
+                user.getId(), user.getUsername(),
+                project.getProjectName(),
+                project.getProjectRole(),
+                project.getProjectDesc(),
+                project.getPersonalDuty(),
+                project.getAchievement(),
+                project.getTechStack()
+        );
         return Result.success("STAR优化成功", result);
+    }
+
+    @PostMapping("/star-generate")
+    public Result<String> starGenerate(@RequestBody Map<String, String> request) {
+        SysUser user = LoginUserHolder.getCurrentUser();
+
+        String result = aiService.generateStar(
+                user.getId(), user.getUsername(),
+                request.getOrDefault("projectName", ""),
+                request.getOrDefault("projectRole", ""),
+                request.getOrDefault("projectDesc", ""),
+                request.getOrDefault("personalDuty", ""),
+                request.getOrDefault("achievement", ""),
+                request.getOrDefault("techStack", "")
+        );
+        return Result.success("STAR成果提炼成功", result);
     }
 
     @GetMapping("/stat/month")
