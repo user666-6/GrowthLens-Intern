@@ -8,6 +8,16 @@
     }
 %>
 <style>
+    .sidebar-inner {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 200px;
+        height: 100vh;
+        display: flex;
+        flex-direction: column;
+        background: linear-gradient(180deg, #667eea 0%, #764ba2 100%);
+    }
     .sidebar-user-card {
         padding: 16px;
         border-top: 1px solid rgba(255,255,255,0.1);
@@ -59,7 +69,7 @@
         margin-right: 6px;
     }
 </style>
-<div class="sidebar col-2 d-flex flex-column">
+<div class="sidebar-inner">
     <div class="sidebar-header">
         GrowthLens
     </div>

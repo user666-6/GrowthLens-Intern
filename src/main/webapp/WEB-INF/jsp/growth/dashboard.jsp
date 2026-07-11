@@ -13,7 +13,8 @@
     <script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js"></script>
     <style>
         body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; background-color: #f8f9fa; }
-        .sidebar { min-height: 100vh; background: linear-gradient(180deg, #667eea 0%, #764ba2 100%); padding: 0; }
+        .sidebar-placeholder { width: 200px; flex-shrink: 0; }
+        .sidebar-inner { min-height: 100vh; background: linear-gradient(180deg, #667eea 0%, #764ba2 100%); padding: 0; }
         .sidebar-header { padding: 24px; color: white; font-size: 20px; font-weight: 600; border-bottom: 1px solid rgba(255,255,255,0.1); }
         .sidebar-menu { list-style: none; padding: 0; margin: 0; }
         .sidebar-menu li a { display: block; padding: 14px 24px; color: rgba(255,255,255,0.9); text-decoration: none; transition: all 0.3s; }
@@ -41,6 +42,7 @@
 </head>
 <body>
     <div class="d-flex">
+        <div class="sidebar-placeholder"></div>
         <jsp:include page="/WEB-INF/jsp/common/sidebar.jsp" />
         <div class="flex-grow-1">
             <jsp:include page="/WEB-INF/jsp/common/header.jsp" />

@@ -15,7 +15,8 @@
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
             background-color: #f8f9fa;
         }
-        .sidebar {
+        .sidebar-placeholder { width: 200px; flex-shrink: 0; }
+        .sidebar-inner {
             min-height: 100vh;
             background: linear-gradient(180deg, #667eea 0%, #764ba2 100%);
             padding: 0;
@@ -126,6 +127,7 @@
 </head>
 <body>
     <div class="d-flex">
+        <div class="sidebar-placeholder"></div>
         <jsp:include page="/WEB-INF/jsp/common/sidebar.jsp" />
         
         <div class="flex-grow-1">
