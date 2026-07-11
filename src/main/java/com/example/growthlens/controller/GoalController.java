@@ -131,12 +131,19 @@ public class GoalController {
     }
 
     @GetMapping("/detail/{id}")
-    public String detail(@PathVariable Long id, Model model) {
+    public String detail(@PathVariable Long id, 
+                         @RequestParam(required = false) Integer status,
+                         Model model) {
         GoalInfo goalInfo = goalService.getGoalById(id);
         List<GoalTask> tasks = goalService.getTasksByGoalId(id);
         
+        if (status != null) {
+            tasks = tasks.stream().filter(t -> status.equals(t.getStatus())).toList();
+        }
+        
         model.addAttribute("goal", goalInfo);
         model.addAttribute("tasks", tasks);
+        model.addAttribute("taskStatusFilter", status);
         return "goal/detail";
     }
 
