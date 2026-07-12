@@ -216,6 +216,12 @@
             if (!year) return;
             var week = prompt("请输入周次：", "");
             if (!week) return;
+
+            var btn = document.querySelector('.btn-outline-primary');
+            var originalText = btn.textContent;
+            btn.disabled = true;
+            btn.textContent = '生成中...';
+
             fetch(ctxPath + '/dailyreport/weekly/generate', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
@@ -231,6 +237,9 @@
                 }
             }).catch(function(error) {
                 alert('生成失败');
+            }).finally(function() {
+                btn.disabled = false;
+                btn.textContent = originalText;
             });
         }
 

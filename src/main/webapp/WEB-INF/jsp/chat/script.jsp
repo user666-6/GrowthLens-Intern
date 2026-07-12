@@ -221,6 +221,11 @@
                 return;
             }
 
+            var btn = document.querySelector('.btn-primary');
+            var originalText = btn.textContent;
+            btn.disabled = true;
+            btn.textContent = '生成中...';
+
             var resultCard = document.getElementById('resultCard');
             resultCard.classList.add('loading');
             resultCard.textContent = '正在生成话术，请稍候...';
@@ -244,6 +249,9 @@
             }).catch(function(error) {
                 resultCard.classList.remove('loading');
                 resultCard.textContent = '网络错误，请稍后重试';
+            }).finally(function() {
+                btn.disabled = false;
+                btn.textContent = originalText;
             });
         }
     </script>

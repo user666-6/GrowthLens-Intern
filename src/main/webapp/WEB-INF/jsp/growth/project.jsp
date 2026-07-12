@@ -316,13 +316,19 @@
         }
 
         function starOptimize(id) {
+            var btn = document.querySelector('.btn-star[data-id="' + id + '"]');
+            var originalText = btn.textContent;
+            btn.disabled = true;
+            btn.textContent = '生成中...';
+
             document.getElementById('star-content').textContent = '正在生成 STAR 格式，请稍候...';
             new bootstrap.Modal(document.getElementById('starModal')).show();
             fetch(ctxPath + '/project/' + id + '/star-optimize', { method: 'POST' })
                 .then(function(r) { return r.json(); }).then(function(res) {
                     if (res.code === 200) document.getElementById('star-content').textContent = res.data;
                     else document.getElementById('star-content').textContent = '生成失败：' + res.msg;
-                }).catch(function(e) { document.getElementById('star-content').textContent = '请求失败，请稍后重试'; });
+                }).catch(function(e) { document.getElementById('star-content').textContent = '请求失败，请稍后重试'; })
+                .finally(function() { btn.disabled = false; btn.textContent = originalText; });
         }
 
         function aiFillAchievement() {

@@ -178,6 +178,11 @@
                 alert('请先输入目标名称');
                 return;
             }
+
+            var btn = document.querySelector('.btn-outline-info');
+            var originalText = btn.textContent;
+            btn.disabled = true;
+            btn.textContent = '拆解中...';
             
             var duration = 30;
             if (endDate) {
@@ -199,7 +204,10 @@
                 } else {
                     alert(result.msg);
                 }
-            }).catch(err => alert('AI拆解失败'));
+            }).catch(err => alert('AI拆解失败')).finally(function() {
+                btn.disabled = false;
+                btn.textContent = originalText;
+            });
         }
         
         function applySmartGoals() {

@@ -253,8 +253,12 @@
 
         function sendMessage() {
             var input = document.getElementById('questionInput');
+            var btn = document.querySelector('.chat-input-area button');
             var question = input.value.trim();
             if (!question) return;
+
+            btn.disabled = true;
+            btn.textContent = '发送中...';
 
             addMessage(question, 'user');
             input.value = '';
@@ -282,6 +286,9 @@
             }).catch(function(error) {
                 removeMessage(loadingId);
                 addMessage('抱歉，网络错误，请稍后重试', 'ai');
+            }).finally(function() {
+                btn.disabled = false;
+                btn.textContent = '发送';
             });
         }
 
