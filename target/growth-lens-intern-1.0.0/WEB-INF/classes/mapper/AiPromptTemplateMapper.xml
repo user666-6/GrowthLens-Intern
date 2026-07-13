@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.example.growthlens.mapper.AiPromptTemplateMapper">
+
+    <resultMap id="BaseResultMap" type="com.example.growthlens.entity.AiPromptTemplate">
+        <id column="id" property="id"/>
+        <result column="template_name" property="templateName"/>
+        <result column="template_code" property="templateCode"/>
+        <result column="template_content" property="templateContent"/>
+        <result column="description" property="description"/>
+        <result column="scene_type" property="sceneType"/>
+        <result column="status" property="status"/>
+        <result column="create_time" property="createTime"/>
+        <result column="update_time" property="updateTime"/>
+    </resultMap>
+
+    <insert id="insert" parameterType="com.example.growthlens.entity.AiPromptTemplate" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO ai_prompt_template (
+            template_name, template_code, template_content, description, scene_type, status, create_time, update_time
+        ) VALUES (
+            #{templateName}, #{templateCode}, #{templateContent}, #{description}, #{sceneType}, #{status}, NOW(), NOW()
+        )
+    </insert>
+
+    <update id="update" parameterType="com.example.growthlens.entity.AiPromptTemplate">
+        UPDATE ai_prompt_template SET
+            template_name = #{templateName},
+            template_code = #{templateCode},
+            template_content = #{templateContent},
+            description = #{description},
+            scene_type = #{sceneType},
+            status = #{status},
+            update_time = NOW()
+        WHERE id = #{id}
+    </update>
+
+    <delete id="deleteById" parameterType="java.lang.Long">
+        DELETE FROM ai_prompt_template WHERE id = #{id}
+    </delete>
+
+</mapper>

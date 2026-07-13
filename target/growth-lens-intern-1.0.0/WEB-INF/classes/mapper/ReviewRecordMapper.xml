@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.example.growthlens.mapper.ReviewRecordMapper">
+
+    <resultMap id="BaseResultMap" type="com.example.growthlens.entity.ReviewRecord">
+        <id column="id" property="id"/>
+        <result column="user_id" property="userId"/>
+        <result column="review_type" property="reviewType"/>
+        <result column="start_date" property="startDate"/>
+        <result column="end_date" property="endDate"/>
+        <result column="original_content" property="originalContent"/>
+        <result column="highlight" property="highlight"/>
+        <result column="shortage" property="shortage"/>
+        <result column="suggestion" property="suggestion"/>
+        <result column="full_content" property="fullContent"/>
+        <result column="status" property="status"/>
+        <result column="error_msg" property="errorMsg"/>
+        <result column="create_time" property="createTime"/>
+        <result column="update_time" property="updateTime"/>
+    </resultMap>
+
+    <insert id="insert" parameterType="com.example.growthlens.entity.ReviewRecord" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO review_record (
+            user_id, review_type, start_date, end_date, original_content,
+            highlight, shortage, suggestion, full_content, status, error_msg
+        ) VALUES (
+            #{userId}, #{reviewType}, #{startDate}, #{endDate}, #{originalContent},
+            #{highlight}, #{shortage}, #{suggestion}, #{fullContent}, #{status}, #{errorMsg}
+        )
+    </insert>
+
+    <update id="updateById" parameterType="com.example.growthlens.entity.ReviewRecord">
+        UPDATE review_record SET
+            review_type = #{reviewType},
+            start_date = #{startDate},
+            end_date = #{endDate},
+            original_content = #{originalContent},
+            highlight = #{highlight},
+            shortage = #{shortage},
+            suggestion = #{suggestion},
+            full_content = #{fullContent},
+            status = #{status},
+            error_msg = #{errorMsg},
+            update_time = NOW()
+        WHERE id = #{id}
+    </update>
+
+    <delete id="deleteById" parameterType="java.lang.Long">
+        DELETE FROM review_record WHERE id = #{id}
+    </delete>
+
+    <select id="selectById" parameterType="java.lang.Long" resultMap="BaseResultMap">
+        SELECT * FROM review_record WHERE id = #{id}
+    </select>
+
+    <select id="selectPage" resultMap="BaseResultMap">
+        SELECT * FROM review_record
+        WHERE 1 = 1
+        <if test="userId != null">AND user_id = #{userId}</if>
+        <if test="reviewType != null and reviewType != ''">AND review_type = #{reviewType}</if>
+        <if test="startDate != null">AND start_date &gt;= #{startDate}</if>
+        <if test="endDate != null">AND end_date &lt;= #{endDate}</if>
+        ORDER BY create_time DESC
+    </select>
+
+    <select id="selectMaxId" resultType="java.lang.Long">
+        SELECT IFNULL(MAX(id), 0) FROM review_record
+    </select>
+
+    <update id="resetAutoIncrement">
+        ALTER TABLE review_record AUTO_INCREMENT = #{nextId}
+    </update>
+
+</mapper>

@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.example.growthlens.mapper.GoalInfoMapper">
+
+    <resultMap id="BaseResultMap" type="com.example.growthlens.entity.GoalInfo">
+        <id column="id" property="id"/>
+        <result column="user_id" property="userId"/>
+        <result column="goal_name" property="goalName"/>
+        <result column="goal_desc" property="goalDesc"/>
+        <result column="goal_type" property="goalType"/>
+        <result column="priority" property="priority"/>
+        <result column="start_date" property="startDate"/>
+        <result column="end_date" property="endDate"/>
+        <result column="expect_result" property="expectResult"/>
+        <result column="progress" property="progress"/>
+        <result column="status" property="status"/>
+        <result column="create_time" property="createTime"/>
+        <result column="update_time" property="updateTime"/>
+    </resultMap>
+
+    <select id="findByUserId" resultMap="BaseResultMap">
+        SELECT * FROM goal_info WHERE user_id = #{userId} ORDER BY create_time DESC
+    </select>
+
+    <select id="findById" resultMap="BaseResultMap">
+        SELECT * FROM goal_info WHERE id = #{id}
+    </select>
+
+    <select id="findByUserIdAndStatus" resultMap="BaseResultMap">
+        SELECT * FROM goal_info WHERE user_id = #{userId} AND status = #{status} ORDER BY create_time DESC
+    </select>
+
+    <select id="findByUserIdAndType" resultMap="BaseResultMap">
+        SELECT * FROM goal_info WHERE user_id = #{userId} AND goal_type = #{goalType} ORDER BY create_time DESC
+    </select>
+
+    <insert id="insert" parameterType="com.example.growthlens.entity.GoalInfo" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO goal_info (
+            user_id, goal_name, goal_desc, goal_type, priority,
+            start_date, end_date, expect_result, progress, status, create_time, update_time
+        ) VALUES (
+            #{userId}, #{goalName}, #{goalDesc}, #{goalType}, #{priority},
+            #{startDate}, #{endDate}, #{expectResult}, #{progress}, #{status}, NOW(), NOW()
+        )
+    </insert>
+
+    <update id="update" parameterType="com.example.growthlens.entity.GoalInfo">
+        UPDATE goal_info SET
+            goal_name = #{goalName},
+            goal_desc = #{goalDesc},
+            goal_type = #{goalType},
+            priority = #{priority},
+            start_date = #{startDate},
+            end_date = #{endDate},
+            expect_result = #{expectResult},
+            progress = #{progress},
+            status = #{status},
+            update_time = NOW()
+        WHERE id = #{id}
+    </update>
+
+    <update id="updateProgress">
+        UPDATE goal_info SET progress = #{progress}, update_time = NOW() WHERE id = #{id}
+    </update>
+
+    <delete id="deleteById" parameterType="java.lang.Long">
+        DELETE FROM goal_info WHERE id = #{id}
+    </delete>
+
+</mapper>

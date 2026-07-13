@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.example.growthlens.mapper.GoalTaskMapper">
+
+    <resultMap id="BaseResultMap" type="com.example.growthlens.entity.GoalTask">
+        <id column="id" property="id"/>
+        <result column="user_id" property="userId"/>
+        <result column="goal_id" property="goalId"/>
+        <result column="task_name" property="taskName"/>
+        <result column="task_desc" property="taskDesc"/>
+        <result column="priority" property="priority"/>
+        <result column="deadline" property="deadline"/>
+        <result column="sort" property="sort"/>
+        <result column="status" property="status"/>
+        <result column="create_time" property="createTime"/>
+        <result column="update_time" property="updateTime"/>
+    </resultMap>
+
+    <select id="findByGoalId" resultMap="BaseResultMap">
+        SELECT * FROM goal_task WHERE goal_id = #{goalId} ORDER BY sort ASC, create_time ASC
+    </select>
+
+    <select id="findByUserId" resultMap="BaseResultMap">
+        SELECT * FROM goal_task WHERE user_id = #{userId} ORDER BY create_time DESC
+    </select>
+
+    <select id="findById" resultMap="BaseResultMap">
+        SELECT * FROM goal_task WHERE id = #{id}
+    </select>
+
+    <select id="findByUserIdAndStatus" resultMap="BaseResultMap">
+        SELECT * FROM goal_task WHERE user_id = #{userId} AND status = #{status} ORDER BY create_time DESC
+    </select>
+
+    <insert id="insert" parameterType="com.example.growthlens.entity.GoalTask" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO goal_task (
+            user_id, goal_id, task_name, task_desc, priority, deadline, sort, status, create_time, update_time
+        ) VALUES (
+            #{userId}, #{goalId}, #{taskName}, #{taskDesc}, #{priority}, #{deadline}, #{sort}, #{status}, NOW(), NOW()
+        )
+    </insert>
+
+    <update id="update" parameterType="com.example.growthlens.entity.GoalTask">
+        UPDATE goal_task SET
+            task_name = #{taskName},
+            task_desc = #{taskDesc},
+            priority = #{priority},
+            deadline = #{deadline},
+            sort = #{sort},
+            status = #{status},
+            update_time = NOW()
+        WHERE id = #{id}
+    </update>
+
+    <update id="updateStatus">
+        UPDATE goal_task SET status = #{status}, update_time = NOW() WHERE id = #{id}
+    </update>
+
+    <delete id="deleteById" parameterType="java.lang.Long">
+        DELETE FROM goal_task WHERE id = #{id}
+    </delete>
+
+    <delete id="deleteByGoalId" parameterType="java.lang.Long">
+        DELETE FROM goal_task WHERE goal_id = #{goalId}
+    </delete>
+
+</mapper>
